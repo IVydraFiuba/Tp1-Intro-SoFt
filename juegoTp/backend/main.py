@@ -19,9 +19,9 @@ def data_usuarios():
                 'Id':usuario.id ,
                         'Nombre':usuario.nom_usuario,
                         'Concesionaria':{'Id': concesionaria.id,
-                                    'Nombre': concesionaria.nom_concesionaria,
+                                    'Nombre': concesionaria.nom_concesionaria
                                     },
-                        'Plata': usuario.plata, 
+                        'Plata': usuario.plata
             }
             usuarios_data.append(usuario_data)
         return jsonify(usuarios_data)
@@ -37,7 +37,7 @@ def nueva_partida():
         #Aca si es necesario podria hacer validaciones de los datos que me paso el usuario
         #
         #
-        nueva_concesionaria = Concesionaria(Nom_concesionaria=Nom_concesionaria)
+        nueva_concesionaria = Concesionaria(nom_concesionaria=Nom_concesionaria)
         db.session.add(nueva_concesionaria)
         db.session.flush()
         nuevo_usuario = Usuario(nom_usuario=Nom_usuario, concesionaria_id=nueva_concesionaria.id)
@@ -50,7 +50,7 @@ def nueva_partida():
             'Usuario':{'Id':nuevo_usuario.id ,
                         'Nombre':nuevo_usuario.nom_usuario,
                         'Concesionaria':{'Id': nueva_concesionaria.id,
-                                    'Nombre': nueva_concesionaria.nom_concesionaria,
+                                    'Nombre': nueva_concesionaria.nom_concesionaria
                                     },
                         'Plata': nuevo_usuario.plata}
             }) 
