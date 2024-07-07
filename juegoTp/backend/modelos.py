@@ -7,7 +7,7 @@ class Usuario(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nom_usuario = db.Column(db.String(255), nullable=False)
     concesionaria_id = db.Column(db.Integer, db.ForeignKey('concesionarias.id'), nullable=False)
-    plata = db.Column(db.Integer, nullable=False , default=500)
+    plata = db.Column(db.Integer, nullable=False , default=5000)
 
 class Concesionaria(db.Model):
     __tablename__ = 'concesionarias'
