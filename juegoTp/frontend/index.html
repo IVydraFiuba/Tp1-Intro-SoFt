@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Meta datos -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tp1-IntroSoft</title>
+    <!-- Link a bootstrap CSS -->
+    <link rel="stylesheet" href="Frameworks/Bootstrap/css/bootstrap.min.css">
+    <!-- link a CSS propio -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body data-bs-theme="dark">
+    <div class="container my-4">
+        <div class="row">
+            <div class="col-12 col-md-10 col-lg-6 mx-auto">
+                <div class="card">
+                    <div class="card-body">
+                            <h1 class="card-title">TITULO DEL JUEGO</h1>
+                        <div class="d-grid gap-2">
+                            <!-- con disable se desactiva el boton(Util para cuando no tenes una partida para continuar) -->
+                            <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_jugar">JUGAR</button>
+                            <div class="modal fade" id="ventana_modal_jugar" tabindex="-1" data-bs-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <!-- adentro de este modal-content podemos poner todo lo que queramos -->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title">ELIGE UN PERSONAJE</h2>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">  
+                                                <div class="list-group" id="elegir_usuarios">
+                                                </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_crear">CREAR PERSONAJE</button>
+                            <div class="modal fade" id="ventana_modal_crear" tabindex="-1" data-bs-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title">CREANDO PERSONAJE...</h2>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <form onsubmit="cargar_nuevo_personaje(event)">
+                                                <div class="mb-3">
+                                                    <label for="nom_usuario" class="form-label">Nombre del personaje</label>
+                                                    <input type="text" class="form-control" name="nom_usuario" placeholder="Juancito123GamerPro" required>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="nom_mercado" class="form-label">Nombre de la concesionaria</label>
+                                                    <input type="text" class="form-control" name="nom_mercado" placeholder="Chatarreros" required>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-success">Cargar</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- link a bootstrap JS -->
+    <script src="Frameworks/Bootstrap/js/bootstrap.min.js"></script>
+    <!-- link a JS propio -->
+    <script src="main.js"></script>
+</body>
+</html>
