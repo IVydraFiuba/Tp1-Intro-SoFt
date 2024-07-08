@@ -4,11 +4,13 @@ from flask_cors import CORS
 from configuracion import Desarrollo,Entrega
 from modelos import *
 
+import base64
+
 app = Flask(__name__)
 app.config.from_object(Desarrollo) 
 CORS(app)
 
-@app.route('/usuarios',methods=["GET"]) #Por defauld es GET pero no esta mal ponerlo
+@app.route('/usuarios',methods=["GET"]) 
 def data_usuarios():
     try:
         usuarios = Usuario.query.all()
@@ -77,8 +79,33 @@ def data_usuario(id_usuario):
     except:
         return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409
 
+@app.route('/autos',methods=["GET"]) 
+def data_autos():
+    try:
+        autos = Auto.query.all()
+        autos_data=[]
+        for auto in autos:
+            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') if auto.imagen else None
+            auto_data={
+                'Id':auto.id ,
+                'Marca':auto.marca,
+                'Modelo':auto.modelo,
+                'Año': auto.año,
+                'Precio':auto.precio,
+                'Imagen':imagen_base64
+            }
+            autos_data.append(auto_data)
+        return jsonify(autos_data)
+    except:
+        return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
+
 if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        # with open('toyota-corolla.jpg', 'rb') as f:
+        #     imagen_data = f.read()
+        # nuevo_auto = Auto(marca='Toyota', modelo='Corolla', año=2023, precio=25000, imagen=imagen_data)
+        # db.session.add(nuevo_auto)
+        db.session.commit()
     app.run()
