@@ -1,7 +1,8 @@
 let parametros = window.location.search;
 let id = new URLSearchParams(parametros).get("id")
 
-localStorage.setItem('id',id);
+const link_comprar = document.getElementById("link_comprar")
+link_comprar.setAttribute("href", `comprar?id=${id}`);
 
 fetch("http://localhost:5000/usuarios/"+id)
             .then((respuesta) => respuesta.json())
@@ -13,5 +14,4 @@ fetch("http://localhost:5000/usuarios/"+id)
                 contenedor_nombre.innerText = contenido.Nombre
                 const contenedor_plata = document.getElementById("Plata_usuario")
                 contenedor_plata.innerText = contenido.Plata
-                
             }
