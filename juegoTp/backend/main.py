@@ -59,6 +59,24 @@ def nueva_partida():
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo crear el usuario'}),500
 
+@app.route('/usuarios/<id_usuario>',methods=["GET"]) #Por defauld es GET pero no esta mal ponerlo
+def data_usuario(id_usuario):
+    try:
+        usuario = Usuario.query.get(id_usuario)
+        usuario_data=[]
+        concesionaria = Concesionaria.query.get(usuario.concesionaria_id)
+        usuario_data={
+            'Id':usuario.id ,
+            'Nombre':usuario.nom_usuario,
+            'Concesionaria':{'Id': concesionaria.id,
+                            'Nombre': concesionaria.nom_concesionaria
+                            },
+            'Plata': usuario.plata
+            }
+        return jsonify(usuario_data)
+    except:
+        return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409
+
 if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():
