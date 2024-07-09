@@ -1,5 +1,5 @@
 let parametros = window.location.search;
-let id = new URLSearchParams(parametros).get("id")
+var id = new URLSearchParams(parametros).get("id")
 
 const link_concesionaria = document.getElementById("link_concesionaria")
 link_concesionaria.setAttribute("href", `..?id=${id}`);
@@ -38,21 +38,22 @@ fetch("http://localhost:5000/autos")
                     </div>
                     <div class="card-footer">
                         <small class="text-body-secondary">${contenido[0].Precio}$</small>
-                        <button onclick="comprar_auto(${contenido[0].Id})" type="button" class="btn btn-success" >Comprar</button>
+                        <button onclick="comprar_auto(${contenido[0].Id},${id})" type="button" class="btn btn-success" >Comprar</button>
                     </div>
                 </div>
             </div>
                 `
             contenedor_tienda.appendChild(tarjeta_auto);
             }
-function comprar_auto(auto_id){
-    fetch("http://localhost:5000/comprar",{
+function comprar_auto(auto_id,id){
+    fetch("http://localhost:5000/comprar_auto",{
         method: "POST",
         headers: {
             "Content-Type": "application/json"
         },
         body: JSON.stringify({
-            id_auto: auto_id
+            id_auto: auto_id,
+            id_usuario:id
         })
     })
     .then((respuesta) => respuesta.json())

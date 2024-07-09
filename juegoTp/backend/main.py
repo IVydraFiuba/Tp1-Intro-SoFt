@@ -99,10 +99,33 @@ def data_autos():
     except:
         return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
 
+@app.route('/comprar_auto', methods=["POST"])
+def comprar_auto():
+    #FALTAN VALIDACIONES
+    try:
+        data_request =request.json
+        id_auto = data_request.get("id_auto")
+        auto = Auto.query.get(id_auto)
+        id_usuario = data_request.get("id_usuario")
+        usuario = Usuario.query.get(id_usuario)
+
+        nuevo_garaje = Garaje(auto_id= id_auto , concesionaria_id= usuario.concesionaria_id)
+        db.session.add(nuevo_garaje)
+
+        usuario.plata -= auto.precio
+        db.session.commit()
+
+        return jsonify({'success':True,'message':'Compra realizada con exito'})
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'No se pudo comprar el auto'}),500
+
 if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():
         db.create_all()
+        #TENGO QUE SACAR ESTO LUEGO DE AGREGAR LOS AUTOS
         # with open('toyota-corolla.jpg', 'rb') as f:
         #     imagen_data = f.read()
         # nuevo_auto = Auto(marca='Toyota', modelo='Corolla', año=2023, precio=25000, imagen=imagen_data)
