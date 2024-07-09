@@ -63,7 +63,7 @@ function comprar_auto(auto_id,id){
 function procesar_respuesta(data) {
     if (data.success) {
         alert("Comprado con exito")
-
+        location.reload();
         } 
     else {
         alert("Error al realizar la compra ")

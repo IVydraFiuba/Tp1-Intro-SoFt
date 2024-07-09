@@ -99,6 +99,31 @@ def data_autos():
     except:
         return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
 
+@app.route('/garaje/<id_usuario>',methods=["GET"]) 
+def garaje_usuario(id_usuario):
+    try:
+        #el metodo de query().get() ESTA OBSOLETO Y DEBE REMPLAZARSE 
+        usuario = db.session.get(Usuario, id_usuario)
+        garaje = db.session.query(Garaje).join(Concesionaria).filter(Concesionaria.id == usuario.concesionaria_id).all()
+        print(garaje)        
+        garaje_data=[]
+        for auto in garaje:
+            auto = db.session.get(Auto, auto.auto_id)
+            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') if auto.imagen else None
+            auto_data={
+                'Id':auto.id ,
+                'Marca':auto.marca,
+                'Modelo':auto.modelo,
+                'Año': auto.año,
+                'Precio':auto.precio,
+                'Imagen':imagen_base64
+            }
+            garaje_data.append(auto_data)
+
+        return jsonify(garaje_data)
+    except:
+        return jsonify({'success':False,"mensaje":"No tenemos autos en el garaje"}),409
+
 @app.route('/comprar_auto', methods=["POST"])
 def comprar_auto():
     #FALTAN VALIDACIONES
@@ -120,6 +145,7 @@ def comprar_auto():
         print(error)
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo comprar el auto'}),500
+
 
 if __name__ == '__main__':
     db.init_app(app)
