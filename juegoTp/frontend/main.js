@@ -10,29 +10,15 @@ function cargar_datos(contenido){
         item.setAttribute("class", "list-group-item list-group-item-action");
         item.setAttribute("href", `/concesionaria?id=${contenido[index].Id}`);
         item.setAttribute("aria-current", "true");
-
-        const contenedor1 = document.createElement("div");
-        contenedor1.setAttribute("class", "d-flex w-100 justify-content-between");
-
-        const nombre_usuario = document.createElement("h5");
-        nombre_usuario.setAttribute("class", "mb-1");
-        nombre_usuario.textContent = contenido[index].Nombre
-        contenedor1.append(nombre_usuario)
-
-        const contenedor2 = document.createElement("div");
-        contenedor2.setAttribute("class", "d-flex w-100 justify-content-between");
-        const nombre_concesionaria = document.createElement("h5");
-        nombre_concesionaria.setAttribute("class", "mb-1");
-        nombre_concesionaria.textContent = contenido[index].Concesionaria.Nombre
-        const plata = document.createElement("p");
-        plata.textContent = `Plata - ${contenido[index].Plata}$`
-
-        contenedor2.append(nombre_concesionaria)
-        contenedor2.append(plata)
-
-        item.append(contenedor1)
-        item.append(contenedor2)
-
+        item.innerHTML = `
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">${contenido[index].Nombre}</h5>
+        </div>
+        <div class="d-flex w-100 justify-content-between">
+            <h5 class="mb-1">${contenido[index].Concesionaria.Nombre}</h5>
+            <p>"Plata - ${contenido[index].Plata}$"</p>
+        </div>
+        `
         tabla_usuarios.append(item)
     }
 }
