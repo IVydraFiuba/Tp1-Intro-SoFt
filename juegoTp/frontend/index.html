@@ -18,7 +18,7 @@
                             <h1 class="card-title">TITULO DEL JUEGO</h1>
                         <div class="d-grid gap-2">
                             <!-- con disable se desactiva el boton(Util para cuando no tenes una partida para continuar) -->
-                            <button type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_jugar">JUGAR</button>
+                            <button id="boton_jugar" type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_jugar">JUGAR</button>
                             <div class="modal fade" id="ventana_modal_jugar" tabindex="-1" data-bs-backdrop="static">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
                                     <!-- adentro de este modal-content podemos poner todo lo que queramos -->
@@ -44,6 +44,10 @@
                                         </div>
                                         <div class="modal-body">
                                             <form onsubmit="cargar_nuevo_personaje(event)">
+                                                <div class="form-check form-switch">
+                                                    <input type="checkbox" class="form-check-input" id="check_boton">
+                                                    <label class="form-check-label" for="check_boton">Modo admin</label>
+                                                </div>
                                                 <div class="mb-3">
                                                     <label for="nom_usuario" class="form-label">Nombre del personaje</label>
                                                     <input type="text" class="form-control" name="nom_usuario" placeholder="Juancito123GamerPro" required>
@@ -51,6 +55,28 @@
                                                 <div class="mb-3">
                                                     <label for="nom_concesionaria" class="form-label">Nombre de la concesionaria</label>
                                                     <input type="text" class="form-control" name="nom_concesionaria" placeholder="Chatarreros" required>
+                                                </div>
+                                                <div id="campos_extra" style="display: none;">
+                                                    <div class="mb-3">
+                                                        <label for="plata" class="form-label">Plata</label>
+                                                        <input type="number" class="form-control" name="plata" value="5000" >
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="dia" class="form-label">Dia</label>
+                                                        <input type="number" class="form-control" name="dia" value="1" >
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="giros" class="form-label">Giros</label>
+                                                        <input type="number" class="form-control" name="giros" value="3" >
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="nivel_tienda" class="form-label">Nivel concesionaria:</label>
+                                                        <select id="opciones" name="nivel_tienda" class="form-control">
+                                                            <option value=3>3</option>
+                                                            <option value=2>2</option>
+                                                            <option value=1>1</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div class="modal-footer">
                                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
