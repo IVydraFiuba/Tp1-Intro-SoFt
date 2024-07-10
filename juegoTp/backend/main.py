@@ -21,9 +21,12 @@ def data_usuarios():
                 'Id':usuario.id ,
                         'Nombre':usuario.nom_usuario,
                         'Concesionaria':{'Id': concesionaria.id,
-                                    'Nombre': concesionaria.nom_concesionaria
+                                    'Nombre': concesionaria.nom_concesionaria,
+                                    'Nivel' : concesionaria.nivel,
+                                    'Giros' : concesionaria.giros
                                     },
-                        'Plata': usuario.plata
+                        'Plata': usuario.plata,
+                        'Dia': usuario.dia
             }
             usuarios_data.append(usuario_data)
         return jsonify(usuarios_data)
@@ -36,26 +39,20 @@ def nueva_partida():
         formulario_data =request.json
         Nom_usuario = formulario_data.get("nom_usuario")
         Nom_concesionaria = formulario_data.get("nom_concesionaria")
-        #Aca si es necesario podria hacer validaciones de los datos que me paso el usuario
-        #
-        #
-        nueva_concesionaria = Concesionaria(nom_concesionaria=Nom_concesionaria)
+        Plata = formulario_data.get("plata")
+        Dia = formulario_data.get("dia")
+        Giros = formulario_data.get("giros")
+        Nivel = formulario_data.get("nivel_concesionaria")
+
+        nueva_concesionaria = Concesionaria(nom_concesionaria=Nom_concesionaria,nivel=Nivel,giros=Giros)
         db.session.add(nueva_concesionaria)
         db.session.flush()
-        nuevo_usuario = Usuario(nom_usuario=Nom_usuario, concesionaria_id=nueva_concesionaria.id)
+        nuevo_usuario = Usuario(nom_usuario=Nom_usuario, concesionaria_id=nueva_concesionaria.id,plata = Plata, dia = Dia)
         db.session.add(nuevo_usuario)
         db.session.commit()
 
-        #Una buena practica es retornar lo que registramos
-        return jsonify({
-            'success':True,
-            'Usuario':{'Id':nuevo_usuario.id ,
-                        'Nombre':nuevo_usuario.nom_usuario,
-                        'Concesionaria':{'Id': nueva_concesionaria.id,
-                                    'Nombre': nueva_concesionaria.nom_concesionaria
-                                    },
-                        'Plata': nuevo_usuario.plata}
-            }) 
+        return jsonify({'success':True,'message':'Usuario creado con exito'}) 
+    
     except Exception as error:
         print(error)
         db.session.rollback()
@@ -64,16 +61,19 @@ def nueva_partida():
 @app.route('/usuarios/<id_usuario>',methods=["GET"]) #Por defauld es GET pero no esta mal ponerlo
 def data_usuario(id_usuario):
     try:
-        usuario = Usuario.query.get(id_usuario)
+        usuario = db.session.get(Usuario,id_usuario)
         usuario_data=[]
-        concesionaria = Concesionaria.query.get(usuario.concesionaria_id)
+        concesionaria = db.session.get(Concesionaria, usuario.concesionaria_id)
         usuario_data={
             'Id':usuario.id ,
             'Nombre':usuario.nom_usuario,
             'Concesionaria':{'Id': concesionaria.id,
-                            'Nombre': concesionaria.nom_concesionaria
+                            'Nombre': concesionaria.nom_concesionaria,
+                            'Nivel' : concesionaria.nivel,
+                            'Giros' : concesionaria.Giros
                             },
-            'Plata': usuario.plata
+            'Plata': usuario.plata,
+            'Dia' : usuario.dia
             }
         return jsonify(usuario_data)
     except:
@@ -104,8 +104,7 @@ def garaje_usuario(id_usuario):
     try:
         #el metodo de query().get() ESTA OBSOLETO Y DEBE REMPLAZARSE 
         usuario = db.session.get(Usuario, id_usuario)
-        garaje = db.session.query(Garaje).join(Concesionaria).filter(Concesionaria.id == usuario.concesionaria_id).all()
-        print(garaje)        
+        garaje = db.session.query(Garaje).join(Concesionaria).filter(Concesionaria.id == usuario.concesionaria_id).all()       
         garaje_data=[]
         for auto in garaje:
             auto = db.session.get(Auto, auto.auto_id)
@@ -151,10 +150,10 @@ if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():
         db.create_all()
-        #TENGO QUE SACAR ESTO LUEGO DE AGREGAR LOS AUTOS
-        # with open('toyota-corolla.jpg', 'rb') as f:
+
+        # with open('ford-mustang.jpg', 'rb') as f:
         #     imagen_data = f.read()
-        # nuevo_auto = Auto(marca='Toyota', modelo='Corolla', año=2023, precio=25000, imagen=imagen_data)
+        # nuevo_auto = Auto(marca='Ford', modelo='Mustang', año=2019, precio=30000, imagen=imagen_data)
         # db.session.add(nuevo_auto)
-        db.session.commit()
+        # db.session.commit()
     app.run()
