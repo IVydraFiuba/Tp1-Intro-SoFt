@@ -8,11 +8,13 @@ class Usuario(db.Model):
     nom_usuario = db.Column(db.String(255), nullable=False)
     concesionaria_id = db.Column(db.Integer, db.ForeignKey('concesionarias.id'), nullable=False)
     plata = db.Column(db.Integer, nullable=False , default=5000)
-
+    dia = db.Column(db.Integer, nullable=False , default=1)
 class Concesionaria(db.Model):
     __tablename__ = 'concesionarias'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     nom_concesionaria = db.Column(db.String(255), nullable=False)
+    nivel = db.Column(db.Integer, nullable=False , default=3)
+    giros = db.Column(db.Integer, nullable=False , default=3)
 
 class Garaje(db.Model):
     __tablename__='garajes'
@@ -22,6 +24,7 @@ class Garaje(db.Model):
 class Auto(db.Model):
     __tablename__ = "autos"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    nivel = db.Column(db.Integer, nullable=False )
     marca = db.Column(db.String(255), nullable=False)
     modelo = db.Column(db.String(255), nullable=False)
     año = db.Column(db.Integer, nullable=False)
