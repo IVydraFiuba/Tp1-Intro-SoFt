@@ -75,7 +75,6 @@ def data_usuario(id_usuario):
             'Plata': usuario.plata,
             'Dia' : usuario.dia
             }
-        print(usuario_data)
         return jsonify(usuario_data)
     except:
         return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409

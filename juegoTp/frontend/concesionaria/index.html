@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tp1-IntroSoft</title>
     <link rel="stylesheet" href="../Frameworks/Bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../Frameworks/DataTables/datatables.min.css">
 </head>
 <body data-bs-theme="dark">
     <header>
@@ -23,11 +24,14 @@
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h2 class="modal-title">TIENDA</h2>
+                                            <button type="button" class="btn btn-outline-success btn-lg" onclick="mejorar_tienda">Mejorar tienda 10.000 $</button>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">  
-                                            <div class="album py-5 bg-light" id="contenedor_tienda">
-                                                
+                                            <div class="album py-5 bg-light">
+                                                <div class="row row-cols-md-3 g-4" id="contenedor_tienda">
+
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -50,10 +54,33 @@
     </nav>
     </header>
     <main>
+        <div class="container my-4">
+            <div class="col-md-12">
+                <table id="datatable_garaje" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Imagen</th>
+                            <th>Marca</th>
+                            <th>Modelo</th>
+                            <th>Año</th>
+                            <th>Nivel</th>
+                            <th>Precio</th>
+                            <th>Estado</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla_autos">
+                        
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </main>
     <footer>
     </footer>
     <script src="../Frameworks/Bootstrap/js/bootstrap.min.js"></script>
+    <script src="../Frameworks/jquery-3.7.1.min.js"></script>
+    <script src="../Frameworks/DataTables/datatables.min.js"></script>
     <script src="main.js"></script>
 </body>
 </html>
