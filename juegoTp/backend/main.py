@@ -70,11 +70,12 @@ def data_usuario(id_usuario):
             'Concesionaria':{'Id': concesionaria.id,
                             'Nombre': concesionaria.nom_concesionaria,
                             'Nivel' : concesionaria.nivel,
-                            'Giros' : concesionaria.Giros
+                            'Giros' : concesionaria.giros
                             },
             'Plata': usuario.plata,
             'Dia' : usuario.dia
             }
+        print(usuario_data)
         return jsonify(usuario_data)
     except:
         return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409
@@ -88,6 +89,7 @@ def data_autos():
             imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') if auto.imagen else None
             auto_data={
                 'Id':auto.id ,
+                'Nivel':auto.nivel,
                 'Marca':auto.marca,
                 'Modelo':auto.modelo,
                 'Año': auto.año,
@@ -112,6 +114,7 @@ def garaje_usuario(id_usuario):
             auto_data={
                 'Id':auto.id ,
                 'Marca':auto.marca,
+                'Nivel':auto.nivel,
                 'Modelo':auto.modelo,
                 'Año': auto.año,
                 'Precio':auto.precio,
@@ -150,10 +153,9 @@ if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():
         db.create_all()
-
-        # with open('ford-mustang.jpg', 'rb') as f:
+        # with open('toyota-corolla.jpg', 'rb') as f:
         #     imagen_data = f.read()
-        # nuevo_auto = Auto(marca='Ford', modelo='Mustang', año=2019, precio=30000, imagen=imagen_data)
+        # nuevo_auto = Auto(marca='Toyota', modelo='Corolla',nivel=2, año=2022, precio=20000, imagen=imagen_data)
         # db.session.add(nuevo_auto)
         # db.session.commit()
     app.run()

@@ -1,56 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <!-- Meta datos -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Tp1-IntroSoft</title>
-    <!-- Link a bootstrap CSS -->
     <link rel="stylesheet" href="../Frameworks/Bootstrap/css/bootstrap.min.css">
 </head>
 <body data-bs-theme="dark">
-    <nav class="navbar  navbar-dark fondo">
-        <!-- NAV CONTAINER START -->
+    <header>
+    <nav class="navbar navbar-expand-lg bg-body-tertiary">
         <div class="container-fluid">
-            <button
-                class="navbar-toggler"
-                type="button"
-                data-bs-toggle="offcanvas"
-                data-bs-target="#menuLateral"
-                id="probando">
-                <span class="navbar-toggler-icon"></span>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
             </button>
+            <div class="collapse navbar-collapse" id="navbarTogglerDemo01">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item p-3 py-md-1">
+                        <button id="boton_jugar" type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_jugar">COMPRAR AUTOS</button>
+                            <div class="modal fade" id="ventana_modal_jugar" tabindex="-1" data-bs-backdrop="static">
+                                <div class="modal-dialog modal-dialog-centered modal-xl">
+                                    <!-- adentro de este modal-content podemos poner todo lo que queramos -->
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h2 class="modal-title">TIENDA</h2>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">  
+                                            <div class="album py-5 bg-light" id="contenedor_tienda">
+                                                
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </li>
+
+                    <li class="nav-item p-3 py-md-1">
+                        <a href="../" class="nav-link">SALIR</a>
+                    </li>
+                </ul>
             <h1 id="Nombre_concesionaria"></h1>
             <div class="card" style="width: 18rem;">
                 <div class="card-body">
                     <h5 class="card-title">Plata -- <span id="Plata_usuario"></span>$</h5>
+                    <h5 class="card-title">Dia -- <span id="Dia_usuario"></span> </h5class>
                 </div>
             </div>
-            <section class="offcanvas offcanvas-start " id="menuLateral">
-                <div class="offcanvas-header" data-bs-theme="dark">
-                    <h5 class="offcanvas-title text-info">MENU</h5>
-                    <button class="btn-close" type="button" aria-label="close" data-bs-dismiss ="offcanvas"></button>
-                </div>
-                <div>
-                    <div class="offcanvas-body d-flex flex-column justify-content-between px-0">
-                        <ul class="navbar-nav fs-5 justify-content-evenly">
-                            <li class="nav-item p-3 py-md-1">
-                                <a id="link_comprar" class="nav-link">COMPRAR</a>
-                            </li>
-                            <li class="nav-item p-3 py-md-1">
-                                <a href="../" class="nav-link">SALIR</a>
-                            </li>
-                        </ul>
-                </div>
-            </section>
         </div>
     </nav>
-    <div id="contenedor_presentar_autos" class="album py-5 bg-light">
-    </div>
-    <!-- link a bootstrap JS -->
+    </header>
+    <main>
+    </main>
+    <footer>
+    </footer>
     <script src="../Frameworks/Bootstrap/js/bootstrap.min.js"></script>
-    <!-- link a JS propio -->
     <script src="main.js"></script>
 </body>
 </html>
