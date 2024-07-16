@@ -13,11 +13,10 @@
                 <div class="card">
                     <div class="card-body">
                             <h1 class="card-title">TITULO DEL JUEGO</h1>
-                        <div class="d-grid gap-2">
+                        <div class="d-grid gap-2" id="contenedor_padre"> 
                             <button id="boton_jugar" type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_jugar">JUGAR</button>
                             <div class="modal fade" id="ventana_modal_jugar" tabindex="-1" data-bs-backdrop="static">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <!-- adentro de este modal-content podemos poner todo lo que queramos -->
                                     <div class="modal-content">
                                         <div class="modal-header">
                                             <h2 class="modal-title">ELIGE UN PERSONAJE</h2>
@@ -39,7 +38,7 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <form onsubmit="cargar_nuevo_personaje(event)">
+                                            <form onsubmit="crear_usuario(event)">
                                                 <div class="form-check form-switch">
                                                     <input type="checkbox" class="form-check-input" id="check_boton">
                                                     <label class="form-check-label" for="check_boton">Modo admin</label>
@@ -55,18 +54,18 @@
                                                 <div id="campos_extra" style="display: none;">
                                                     <div class="mb-3">
                                                         <label for="plata" class="form-label">Plata</label>
-                                                        <input type="number" class="form-control" name="plata" value="5000" >
+                                                        <input type="number" class="form-control" name="plata" min="0" value="5000" required>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="dia" class="form-label">Dia</label>
-                                                        <input type="number" class="form-control" name="dia" value="1" >
+                                                        <input type="number" class="form-control" name="dia" min="0" value="1" required>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="giros" class="form-label">Giros</label>
-                                                        <input type="number" class="form-control" name="giros" value="3" >
+                                                        <input type="number" class="form-control" name="giros" min="0" value="3" required>
                                                     </div>
                                                     <div class="mb-3">
-                                                        <label for="nivel_tienda" class="form-label">Nivel concesionaria:</label>
+                                                        <label for="nivel_tienda" class="form-label">Nivel concesionaria:</label required>
                                                         <select id="opciones" name="nivel_tienda" class="form-control">
                                                             <option value=3>3</option>
                                                             <option value=2>2</option>

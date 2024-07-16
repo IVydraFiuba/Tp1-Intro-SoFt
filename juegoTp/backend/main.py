@@ -55,10 +55,10 @@ def nueva_partida():
         db.session.add(nuevo_usuario)
         db.session.commit()
 
-        return jsonify({'success':True,'message':'Usuario creado con exito'}) 
+        return jsonify({'success':True,'message':'Usuario creado con exito', 'Id_usuario':nuevo_usuario.id}) 
     
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo crear el usuario'}),500
 
@@ -83,8 +83,8 @@ def data_usuario(id_usuario):
                         }
             }
         return jsonify(usuario_data)
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409
 
 @app.route('/usuarios/<id_usuario>',methods=["DELETE"])
@@ -98,8 +98,8 @@ def eliminar_usuario(id_usuario):
         db.session.commit() 
 
         return jsonify({'success':True,"message":"Usuario eliminado con exito"})
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         return jsonify({'success':False,"message":"No se pudo eliminar el usuario"}),409
 
 @app.route('/usuarios/<id_usuario>', methods=["PUT"])
@@ -115,8 +115,8 @@ def editar_usuario(id_usuario):
         db.session.commit() 
         
         return jsonify({'success':True,'message':'Usuario editado con exito'})
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo editar el usuario'}),500
 
@@ -138,8 +138,8 @@ def data_autos(nivel_tienda):
             }
             autos_data.append(auto_data)
         return jsonify(autos_data)
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
 
 @app.route('/garaje/<id_usuario>',methods=["GET"]) 
@@ -163,8 +163,8 @@ def garaje_usuario(id_usuario):
             garaje_data.append(auto_data)
 
         return jsonify(garaje_data)
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         return jsonify({'success':False,"mensaje":"No tenemos autos en el garaje"}),409
 
 @app.route('/garaje/<id_usuario>', methods=["POST"])
@@ -183,8 +183,8 @@ def comprar_auto(id_usuario):
         db.session.commit()
 
         return jsonify({'success':True,'message':'Compra realizada con exito'})
-    except Exception:
-        print(Exception)
+    except Exception as error:
+        print(error)
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo comprar el auto'}),500
 
