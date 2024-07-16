@@ -142,6 +142,38 @@ def data_autos(nivel_tienda):
         print(error)
         return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
 
+@app.route('/tienda_giros/<id_tienda>', methods=["PUT"])
+def editar_giros(id_tienda):
+    try:
+        formulario_data =request.json
+        giros_actualizados = formulario_data.get("Giros_actualizados")
+
+        tienda = db.session.get(Tienda,id_tienda)
+        tienda.giros = giros_actualizados
+        db.session.commit() 
+        
+        return jsonify({'success':True,'message':'Giros actualizados con exito'})
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'No se pudo actualizar los giros'}),500
+
+@app.route('/tienda_nivel/<id_tienda>', methods=["PUT"])
+def editar_nivel(id_tienda):
+    try:
+        formulario_data =request.json
+        nivel_actualizado = formulario_data.get("Nivel_actualizado")
+
+        tienda = db.session.get(Tienda,id_tienda)
+        tienda.nivel = nivel_actualizado
+        db.session.commit() 
+        
+        return jsonify({'success':True,'message':'Nivel actualizados con exito'})
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'No se pudo actualizar el Nivel'}),500
+
 @app.route('/garaje/<id_usuario>',methods=["GET"]) 
 def garaje_usuario(id_usuario):
     try:
@@ -173,6 +205,7 @@ def comprar_auto(id_usuario):
     try:
         data_request =request.json
         id_auto = data_request.get("id_auto")
+        indice_boton = data_request.get("indice_boton")
         auto = db.session.get(Auto, id_auto)
         usuario = db.session.get(Usuario, id_usuario)
         
@@ -182,7 +215,7 @@ def comprar_auto(id_usuario):
         usuario.plata -= auto.precio
         db.session.commit()
 
-        return jsonify({'success':True,'message':'Compra realizada con exito'})
+        return jsonify({'success':True,'message':'Compra realizada con exito','indice_boton':indice_boton,'Plata':usuario.plata})
     except Exception as error:
         print(error)
         db.session.rollback()
