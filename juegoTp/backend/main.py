@@ -1,10 +1,9 @@
 from flask import Flask , request , jsonify
 from flask_cors import CORS
+import base64
 
 from configuracion import Desarrollo,Entrega
 from modelos import *
-
-import base64
 
 app = Flask(__name__)
 app.config.from_object(Desarrollo) 
@@ -16,21 +15,26 @@ def data_usuarios():
         usuarios = Usuario.query.all()
         usuarios_data=[]
         for usuario in usuarios:
-            concesionaria = Concesionaria.query.get(usuario.concesionaria_id)
+            tienda = db.session.get(Tienda, usuario.tienda_id)
             usuario_data={
+                'success':True,
                 'Id':usuario.id ,
-                        'Nombre':usuario.nom_usuario,
-                        'Concesionaria':{'Id': concesionaria.id,
-                                    'Nombre': concesionaria.nom_concesionaria,
-                                    'Nivel' : concesionaria.nivel,
-                                    'Giros' : concesionaria.giros
-                                    },
-                        'Plata': usuario.plata,
-                        'Dia': usuario.dia
+                'Nombre':usuario.nom_usuario,
+                'Nombre_concesionaria':usuario.nom_concesionaria,
+                'Plata':usuario.plata,
+                'Dia':usuario.dia,
+                'Tienda':{'Id':tienda.id,
+                            'Nivel':tienda.nivel,
+                            'Giros':tienda.giros,
+                            'Auto1_venta':tienda.auto1_venta,
+                            'Auto2_venta':tienda.auto2_venta,
+                            'Auto3_venta':tienda.auto3_venta
+                            }
             }
             usuarios_data.append(usuario_data)
         return jsonify(usuarios_data)
-    except:
+    except Exception:
+        print(Exception)
         return jsonify({'success':False,"mensaje":"No tenemos usuarios cargados"}),409
 
 @app.route('/usuarios', methods=["POST"])
@@ -44,39 +48,43 @@ def nueva_partida():
         Giros = formulario_data.get("giros")
         Nivel = formulario_data.get("nivel_concesionaria")
 
-        nueva_concesionaria = Concesionaria(nom_concesionaria=Nom_concesionaria,nivel=Nivel,giros=Giros)
-        db.session.add(nueva_concesionaria)
+        nueva_tienda = Tienda(nivel=Nivel,giros=Giros)
+        db.session.add(nueva_tienda)
         db.session.flush()
-        nuevo_usuario = Usuario(nom_usuario=Nom_usuario, concesionaria_id=nueva_concesionaria.id,plata = Plata, dia = Dia)
+        nuevo_usuario = Usuario(nom_usuario=Nom_usuario, nom_concesionaria=Nom_concesionaria,tienda_id=nueva_tienda.id,plata = Plata, dia = Dia)
         db.session.add(nuevo_usuario)
         db.session.commit()
 
         return jsonify({'success':True,'message':'Usuario creado con exito'}) 
     
-    except Exception as error:
-        print(error)
+    except Exception:
+        print(Exception)
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo crear el usuario'}),500
 
-@app.route('/usuarios/<id_usuario>',methods=["GET"]) #Por defauld es GET pero no esta mal ponerlo
+@app.route('/usuarios/<id_usuario>',methods=["GET"]) 
 def data_usuario(id_usuario):
     try:
         usuario = db.session.get(Usuario,id_usuario)
         usuario_data=[]
-        concesionaria = db.session.get(Concesionaria, usuario.concesionaria_id)
+        tienda = db.session.get(Tienda, usuario.tienda_id)
         usuario_data={
             'Id':usuario.id ,
             'Nombre':usuario.nom_usuario,
-            'Concesionaria':{'Id': concesionaria.id,
-                            'Nombre': concesionaria.nom_concesionaria,
-                            'Nivel' : concesionaria.nivel,
-                            'Giros' : concesionaria.giros
-                            },
-            'Plata': usuario.plata,
-            'Dia' : usuario.dia
+            'Nombre_concesionaria':usuario.nom_concesionaria,
+            'Plata':usuario.plata,
+            'Dia':usuario.dia,
+            'Tienda':{'Id':tienda.id,
+                        'Nivel':tienda.nivel,
+                        'Giros':tienda.giros,
+                        'Auto1_venta':tienda.auto1_venta,
+                        'Auto2_venta':tienda.auto2_venta,
+                        'Auto3_venta':tienda.auto3_venta
+                        }
             }
         return jsonify(usuario_data)
-    except:
+    except Exception:
+        print(Exception)
         return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409
 
 @app.route('/autos',methods=["GET"]) 
@@ -97,7 +105,8 @@ def data_autos():
             }
             autos_data.append(auto_data)
         return jsonify(autos_data)
-    except:
+    except Exception:
+        print(Exception)
         return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
 
 @app.route('/garaje/<id_usuario>',methods=["GET"]) 
@@ -105,7 +114,7 @@ def garaje_usuario(id_usuario):
     try:
         #el metodo de query().get() ESTA OBSOLETO Y DEBE REMPLAZARSE 
         usuario = db.session.get(Usuario, id_usuario)
-        garaje = db.session.query(Garaje).join(Concesionaria).filter(Concesionaria.id == usuario.concesionaria_id).all()       
+        garaje = db.session.query(Garaje).join(Auto).filter(Garaje.usuario_id == id_usuario).all()    
         garaje_data=[]
         for auto in garaje:
             auto = db.session.get(Auto, auto.auto_id)
@@ -122,19 +131,19 @@ def garaje_usuario(id_usuario):
             garaje_data.append(auto_data)
 
         return jsonify(garaje_data)
-    except:
+    except Exception:
+        print(Exception)
         return jsonify({'success':False,"mensaje":"No tenemos autos en el garaje"}),409
 
-@app.route('/comprar_auto', methods=["POST"])
-def comprar_auto():
+@app.route('/garaje/<id_usuario>', methods=["POST"])
+def comprar_auto(id_usuario):
     #FALTAN VALIDACIONES
     try:
         data_request =request.json
         id_auto = data_request.get("id_auto")
-        auto = Auto.query.get(id_auto)
-        id_usuario = data_request.get("id_usuario")
-        usuario = Usuario.query.get(id_usuario)
-
+        auto = db.session.get(Auto, id_auto)
+        usuario = db.session.get(Usuario, id_usuario)
+        
         nuevo_garaje = Garaje(auto_id= id_auto , concesionaria_id= usuario.concesionaria_id)
         db.session.add(nuevo_garaje)
 
@@ -142,8 +151,8 @@ def comprar_auto():
         db.session.commit()
 
         return jsonify({'success':True,'message':'Compra realizada con exito'})
-    except Exception as error:
-        print(error)
+    except Exception:
+        print(Exception)
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo comprar el auto'}),500
 
