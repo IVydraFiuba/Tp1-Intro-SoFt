@@ -87,10 +87,43 @@ def data_usuario(id_usuario):
         print(Exception)
         return jsonify({'success':False,"mensaje":"No tenemos ese usuario cargado"}),409
 
-@app.route('/autos',methods=["GET"]) 
-def data_autos():
+@app.route('/usuarios/<id_usuario>',methods=["DELETE"])
+def eliminar_usuario(id_usuario):
     try:
-        autos = Auto.query.all()
+        usuario = db.session.get(Usuario,id_usuario)
+        Garaje.query.filter_by(usuario_id=id_usuario).delete()
+        tienda = db.session.get(Tienda,usuario.tienda_id)
+        Usuario.query.filter_by(tienda_id=tienda.id).delete()
+        db.session.delete(usuario)  
+        db.session.commit() 
+
+        return jsonify({'success':True,"message":"Usuario eliminado con exito"})
+    except Exception:
+        print(Exception)
+        return jsonify({'success':False,"message":"No se pudo eliminar el usuario"}),409
+
+@app.route('/usuarios/<id_usuario>', methods=["PUT"])
+def editar_usuario(id_usuario):
+    try:
+        formulario_data =request.json
+        Nom_nuevo = formulario_data.get("nom_nuevo")
+        Nom_nuevo_concesionaria = formulario_data.get("nom_nuevo_concesionaria")
+
+        usuario = db.session.get(Usuario,id_usuario)
+        usuario.nom_usuario = Nom_nuevo
+        usuario.nom_concesionaria = Nom_nuevo_concesionaria
+        db.session.commit() 
+        
+        return jsonify({'success':True,'message':'Usuario editado con exito'})
+    except Exception:
+        print(Exception)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'No se pudo editar el usuario'}),500
+
+@app.route('/autos/<nivel_tienda>',methods=["GET"]) 
+def data_autos(nivel_tienda):
+    try:
+        autos = Auto.query.filter_by(nivel=nivel_tienda).all()
         autos_data=[]
         for auto in autos:
             imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') if auto.imagen else None
@@ -112,7 +145,6 @@ def data_autos():
 @app.route('/garaje/<id_usuario>',methods=["GET"]) 
 def garaje_usuario(id_usuario):
     try:
-        #el metodo de query().get() ESTA OBSOLETO Y DEBE REMPLAZARSE 
         usuario = db.session.get(Usuario, id_usuario)
         garaje = db.session.query(Garaje).join(Auto).filter(Garaje.usuario_id == id_usuario).all()    
         garaje_data=[]
