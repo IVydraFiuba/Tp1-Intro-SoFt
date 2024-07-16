@@ -114,11 +114,11 @@ function crear_usuario(event){
         },
         body: JSON.stringify(body)})
     .then((respuesta) => respuesta.json())
-    .then(procesar_respuesta)
+    .then(procesar_respuesta_crear)
     .catch((error) => console.log("ERROR", error))
     }
 
-function procesar_respuesta(data) {
+function procesar_respuesta_crear(data) {
     if (data.success) {
         let respuesta = confirm("Quires empezar la partida con el?")
         if (respuesta) {

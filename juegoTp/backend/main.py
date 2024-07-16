@@ -176,7 +176,7 @@ def comprar_auto(id_usuario):
         auto = db.session.get(Auto, id_auto)
         usuario = db.session.get(Usuario, id_usuario)
         
-        nuevo_garaje = Garaje(auto_id= id_auto , concesionaria_id= usuario.concesionaria_id)
+        nuevo_garaje = Garaje(auto_id= id_auto , usuario_id= id_usuario)
         db.session.add(nuevo_garaje)
 
         usuario.plata -= auto.precio
