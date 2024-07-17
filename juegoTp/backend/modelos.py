@@ -13,9 +13,6 @@ class Usuario(db.Model):
 class Tienda(db.Model):
     __tablename__ = 'tiendas'
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    auto1_venta = db.Column(db.Boolean, nullable=False, default=False)
-    auto2_venta = db.Column(db.Boolean, nullable=False, default=False)
-    auto3_venta = db.Column(db.Boolean, nullable=False, default=False)
     nivel = db.Column(db.Integer, nullable=False , default=3)
     giros = db.Column(db.Integer, nullable=False , default=3)
 
@@ -24,6 +21,8 @@ class Garaje(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuarios.id'), nullable=False)
     auto_id = db.Column(db.Integer, db.ForeignKey('autos.id'), nullable=False)
+    auto_en_venta = db.Column(db.Boolean, nullable=False, default=False)
+    precio_de_venta = db.Column(db.Integer, nullable=False, default=0)
 class Auto(db.Model):
     __tablename__ = "autos"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)

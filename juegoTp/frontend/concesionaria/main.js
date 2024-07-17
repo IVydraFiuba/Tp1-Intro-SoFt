@@ -251,16 +251,97 @@ function iniciar_data_table(){
                         </td>                         
                         <td>
                             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                <button type="button" class="btn btn-danger">Left</button>
-                                <button type="button" class="btn btn-warning">Middle</button>
-                                <button type="button" class="btn btn-success">Right</button>
+                                <button hidden id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger">Sacar de la venta</button>
+                                <button id="boton_vender_${contenido[index].Id_garaje}"  type="button" class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_vender_${contenido[index].Id_garaje}">Poner en venta</button>
+                        <div class="modal fade" id="ventana_modal_vender_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title">Elije el precio de venta...</h2>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">  
+                                        <div class="row row-cols-md-3 g-4">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Imagen</th>
+                                                        <th>Nivel</th>
+                                                        <th>Precio de compra</th>
+                                                        <th>Precio de venta</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><img src="data:image/jpeg;base64,${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>
+                                                        <td>${contenido[index].Nivel}</td>
+                                                        <td>${contenido[index].Precio} $</td>
+                                                        <td>
+                                                            <form onsubmit="poner_en_venta(event,${contenido[index].Id_garaje})">
+                                                                <input type="text" class="form-control" name="precio_venta" placeholder="${contenido[index].Precio } $" required>
+                                                                <button type="submit" class="btn btn-success">Presentar oferta</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                             </div>
                         </td>
                     </tr>
-                `
+                    `
+                if (contenido[index].En_venta){
+                    const boton_venta = document.getElementById(`boton_vender_${contenido[index].Id_garaje}`)
+                    boton_venta.setAttribute("hidden","")
+                    const boton_sacar_venta = document.getElementById(`boton_sacar_venta_${contenido[index].Id_garaje}`)
+                    boton_sacar_venta.removeAttribute("hidden")
+                }
             }
             dataTable=$("#datatable_garaje").DataTable(ConfigDataTable);
             dataTableinicializada = true;
         }
+function poner_en_venta(event,id_garaje){
+    event.preventDefault()
+    const DataFormulario = new FormData(event.target)
+    let precio_venta =(DataFormulario.get("precio_venta"))
+
+    const myModalEl = document.getElementById(`ventana_modal_vender_${id_garaje}`);
+    const modal = bootstrap.Modal.getInstance(myModalEl);
+    modal.hide();
+
+    let body
+    body = {
+        Nuevo_precio_venta: precio_venta,
+        Id_garaje: id_garaje
+        }
+    fetch("http://localhost:5000/garaje/"+id,{
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)})
+    .then((respuesta) => respuesta.json())
+    .then(procesar_respuesta_poner_en_venta)
+    .catch((error) => console.log("ERROR", error))
+}
+
+function procesar_respuesta_poner_en_venta(data) {
+    if (data.success) {
+        const boton_venta = document.getElementById(`boton_vender_${data.Id_garaje}`)
+        boton_venta.setAttribute("hidden","")
+        const boton_sacar_venta = document.getElementById(`boton_sacar_venta_${data.Id_garaje}`)
+        boton_sacar_venta.removeAttribute("hidden")
+    } 
+    else {
+        alert(data.message)
+    }
+}
+
+
+
 
 iniciar_data_table()

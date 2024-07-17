@@ -25,10 +25,7 @@ def data_usuarios():
                 'Dia':usuario.dia,
                 'Tienda':{'Id':tienda.id,
                             'Nivel':tienda.nivel,
-                            'Giros':tienda.giros,
-                            'Auto1_venta':tienda.auto1_venta,
-                            'Auto2_venta':tienda.auto2_venta,
-                            'Auto3_venta':tienda.auto3_venta
+                            'Giros':tienda.giros
                             }
             }
             usuarios_data.append(usuario_data)
@@ -76,10 +73,7 @@ def data_usuario(id_usuario):
             'Dia':usuario.dia,
             'Tienda':{'Id':tienda.id,
                         'Nivel':tienda.nivel,
-                        'Giros':tienda.giros,
-                        'Auto1_venta':tienda.auto1_venta,
-                        'Auto2_venta':tienda.auto2_venta,
-                        'Auto3_venta':tienda.auto3_venta
+                        'Giros':tienda.giros
                         }
             }
         return jsonify(usuario_data)
@@ -126,7 +120,7 @@ def data_autos(nivel_tienda):
         autos = Auto.query.filter_by(nivel=nivel_tienda).all()
         autos_data=[]
         for auto in autos:
-            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') if auto.imagen else None
+            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') 
             auto_data={
                 'Id':auto.id ,
                 'Nivel':auto.nivel,
@@ -177,12 +171,11 @@ def editar_nivel(id_tienda):
 @app.route('/garaje/<id_usuario>',methods=["GET"]) 
 def garaje_usuario(id_usuario):
     try:
-        usuario = db.session.get(Usuario, id_usuario)
         garaje = db.session.query(Garaje).join(Auto).filter(Garaje.usuario_id == id_usuario).all()    
         garaje_data=[]
-        for auto in garaje:
-            auto = db.session.get(Auto, auto.auto_id)
-            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') if auto.imagen else None
+        for auto_info in garaje:
+            auto = db.session.get(Auto, auto_info.auto_id)
+            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') 
             auto_data={
                 'Id':auto.id ,
                 'Marca':auto.marca,
@@ -190,7 +183,10 @@ def garaje_usuario(id_usuario):
                 'Modelo':auto.modelo,
                 'Año': auto.año,
                 'Precio':auto.precio,
-                'Imagen':imagen_base64
+                'Imagen':imagen_base64,
+                'En_venta':auto_info.auto_en_venta,
+                'Id_garaje':auto_info.id,
+                'Precio_venta':auto_info.precio_de_venta
             }
             garaje_data.append(auto_data)
 
@@ -221,6 +217,23 @@ def comprar_auto(id_usuario):
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo comprar el auto'}),500
 
+@app.route('/garaje/<id_usuario>', methods=["PUT"])
+def poner_en_venta(id_usuario):
+    try:
+        cambios_data =request.json
+        nuevo_precio_venta = cambios_data.get("Nuevo_precio_venta")
+        id_garaje = cambios_data.get("Id_garaje")
+
+        garaje = db.session.get(Garaje,id_garaje)
+        garaje.precio_de_venta = nuevo_precio_venta
+        garaje.auto_en_venta = True
+        db.session.commit() 
+        
+        return jsonify({'success':True,'message':'Auto puesto en venta con exito','Id_garaje':id_garaje})
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'El auto no se pudo poner en venta'}),500
 
 if __name__ == '__main__':
     db.init_app(app)
