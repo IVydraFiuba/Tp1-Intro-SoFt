@@ -235,6 +235,23 @@ def poner_en_venta(id_usuario):
         db.session.rollback()
         return jsonify({'success':False,'message':'El auto no se pudo poner en venta'}),500
 
+@app.route('/garaje_sacar_venta/<id_usuario>', methods=["PUT"])
+def sacar_en_venta(id_usuario):
+    try:
+        cambios_data =request.json
+        id_garaje = cambios_data.get("Id_garaje")
+
+        garaje = db.session.get(Garaje,id_garaje)
+        garaje.precio_de_venta = 0
+        garaje.auto_en_venta = False
+        db.session.commit() 
+        
+        return jsonify({'success':True,'message':'Auto sacado de la venta con exito','Id_garaje':id_garaje})
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'El auto no se pudo sacar de la venta'}),500
+
 if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():

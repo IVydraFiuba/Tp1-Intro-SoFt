@@ -251,7 +251,7 @@ function iniciar_data_table(){
                         </td>                         
                         <td>
                             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                <button hidden id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger">Sacar de la venta</button>
+                                <button hidden onclick="sacar_de_venta(${contenido[index].Id_garaje})" id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger">Sacar de la venta</button>
                                 <button id="boton_vender_${contenido[index].Id_garaje}"  type="button" class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_vender_${contenido[index].Id_garaje}">Poner en venta</button>
                         <div class="modal fade" id="ventana_modal_vender_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
                             <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -328,7 +328,6 @@ function poner_en_venta(event,id_garaje){
     .then(procesar_respuesta_poner_en_venta)
     .catch((error) => console.log("ERROR", error))
 }
-
 function procesar_respuesta_poner_en_venta(data) {
     if (data.success) {
         const boton_venta = document.getElementById(`boton_vender_${data.Id_garaje}`)
@@ -341,7 +340,31 @@ function procesar_respuesta_poner_en_venta(data) {
     }
 }
 
+function sacar_de_venta(id_garaje){
+    let body
+    body = {Id_garaje: id_garaje}
+    fetch("http://localhost:5000/garaje_sacar_venta/"+id,{
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(body)})
+    .then((respuesta) => respuesta.json())
+    .then(procesar_respuesta_sacar_venta)
+    .catch((error) => console.log("ERROR", error))
 
+    function procesar_respuesta_sacar_venta(data) {
+        if (data.success) {
+            const boton_sacar_venta = document.getElementById(`boton_sacar_venta_${data.Id_garaje}`)
+            boton_sacar_venta.setAttribute("hidden","")
+            const boton_venta = document.getElementById(`boton_vender_${data.Id_garaje}`)
+            boton_venta.removeAttribute("hidden")
+        } 
+        else {
+            alert(data.message)
+        }
+    }
+}
 
 
 iniciar_data_table()
