@@ -27,16 +27,14 @@
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">  
-                                        <div class="album py-5 bg-light">
-                                            <div class="row row-cols-md-3 g-4" id="contenedor_tienda">
-                                            </div>
+                                        <div class="row row-cols-md-3 g-4" id="contenedor_tienda">
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </li>
-
+                    <img src="imagenes/toyota-corolla.jpg" alt="">
                     <li class="nav-item p-3 py-md-1">
                         <a href="../" class="nav-link">SALIR</a>
                     </li>
@@ -50,7 +48,21 @@
                 <div class="card" style="width: 12rem;">
                     <div class="card-body">
                         <button type="button" class="btn btn-outline-success btn-lg"  id="boton_iniciar_dia"  onclick="iniciar_dia()">Iniciar dia</button>
-                        <button type="button" class="btn btn-outline-success btn-lg"  id="boton_pasar_dia" hidden ">Pasar de dia</button>
+                        <button id="boton_pasar_dia" hidden type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_pasar_dia">Pasar de dia</button>
+                        <div class="modal fade" id="ventana_modal_pasar_dia" tabindex="-1" data-bs-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title">Resumen del dia</h2>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">  
+                                        <div id="contenedor_pasar_dia">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                         <h4 class="card-title" id="tiempo" hidden >8:00 AM</h4>
                     </div>
                 </div>
@@ -70,8 +82,8 @@
                             <th>Año</th>
                             <th>Nivel</th>
                             <th>Precio</th>
+                            <th>Ofertas</th>
                             <th>Estado</th>
-                            <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody id="tabla_autos">

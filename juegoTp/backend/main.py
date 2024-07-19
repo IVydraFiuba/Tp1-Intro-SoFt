@@ -157,8 +157,13 @@ def editar_nivel(id_tienda):
     try:
         formulario_data =request.json
         nivel_actualizado = formulario_data.get("Nivel_actualizado")
-
+        usuario = Usuario.query.filter_by(tienda_id=id_tienda).first()
         tienda = db.session.get(Tienda,id_tienda)
+        if (nivel_actualizado == 2):
+            usuario.plata -= 15000
+        else:
+            usuario.plata -= 40000
+            
         tienda.nivel = nivel_actualizado
         db.session.commit() 
         
@@ -211,7 +216,7 @@ def comprar_auto(id_usuario):
         usuario.plata -= auto.precio
         db.session.commit()
 
-        return jsonify({'success':True,'message':'Compra realizada con exito','indice_boton':indice_boton,'Plata':usuario.plata})
+        return jsonify({'success':True,'message':'Compra realizada con exito','indice_boton':indice_boton,'Plata':usuario.plata,'Precio':auto.precio})
     except Exception as error:
         print(error)
         db.session.rollback()
@@ -225,15 +230,35 @@ def poner_en_venta(id_usuario):
         id_garaje = cambios_data.get("Id_garaje")
 
         garaje = db.session.get(Garaje,id_garaje)
+        auto = db.session.get(Auto,garaje.auto_id)
+        
         garaje.precio_de_venta = nuevo_precio_venta
         garaje.auto_en_venta = True
         db.session.commit() 
         
-        return jsonify({'success':True,'message':'Auto puesto en venta con exito','Id_garaje':id_garaje})
+        return jsonify({'success':True,'message':'Auto puesto en venta con exito','Id_garaje':id_garaje,'Precio':auto.precio,'Precio_de_venta':nuevo_precio_venta})
     except Exception as error:
         print(error)
         db.session.rollback()
         return jsonify({'success':False,'message':'El auto no se pudo poner en venta'}),500
+
+@app.route('/garaje_vender/<id_garaje>',methods=["POST"])
+def vender_auto(id_garaje):
+    try:
+        data =request.json
+        ganancia = data.get("Ganancia")
+        garaje = db.session.get(Garaje,id_garaje)
+        usuario = db.session.get(Usuario,garaje.usuario_id)
+        usuario.plata += ganancia
+
+        db.session.delete(garaje)  
+        db.session.commit() 
+
+        return jsonify({'success':True,"message":"Venta realizada con exito",'Plata':usuario.plata,'Id_garaje':id_garaje,'Ganancia':ganancia})
+    except Exception as error:
+        db.session.rollback()
+        print(error)
+        return jsonify({'success':False,"message":"No se pudo realizar la venta"}),409
 
 @app.route('/garaje_sacar_venta/<id_usuario>', methods=["PUT"])
 def sacar_en_venta(id_usuario):
@@ -252,6 +277,19 @@ def sacar_en_venta(id_usuario):
         db.session.rollback()
         return jsonify({'success':False,'message':'El auto no se pudo sacar de la venta'}),500
 
+@app.route('/usuarios/<id_usuario>/terminar_dia/<dia>', methods=["PUT"])
+def terminar_dia(id_usuario,dia):
+    try:
+        usuario = db.session.get(Usuario,id_usuario)
+        usuario.dia = int(dia) + 1
+        db.session.commit() 
+        
+        return jsonify({'success':True,'message':'Dia actualizado con exito'})
+    except Exception as error:
+        print(error)
+        db.session.rollback()
+        return jsonify({'success':False,'message':'El dia no se pudo actualizar'}),500
+    
 if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():

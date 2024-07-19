@@ -125,7 +125,7 @@ function procesar_respuesta_crear(data) {
             window.location.href = `/concesionaria?id=${data.Id_usuario}`;
         }
         else {
-            location.reload();
+            location.reload()
         }
     } 
     else {
@@ -172,14 +172,12 @@ function editar_usuario(event,id_usuario){
         .then(procesar_respuesta_editar)
         .catch((error) => console.log("ERROR", error))
         }
-
-
-function procesar_respuesta_editar(data) {
-    if (data.success) {
-        alert(data.message)
-        location.reload();
-    } 
-    else {
-        alert(data.message)
-    }
+    function procesar_respuesta_editar(data) {
+        if (data.success) {
+            alert(data.message)
+            location.reload();
+        } 
+        else {
+            alert(data.message)
+        }
 }
