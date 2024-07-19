@@ -119,8 +119,7 @@ def data_autos(nivel_tienda):
     try:
         autos = Auto.query.filter_by(nivel=nivel_tienda).all()
         autos_data=[]
-        for auto in autos:
-            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') 
+        for auto in autos: 
             auto_data={
                 'Id':auto.id ,
                 'Nivel':auto.nivel,
@@ -128,7 +127,7 @@ def data_autos(nivel_tienda):
                 'Modelo':auto.modelo,
                 'Año': auto.año,
                 'Precio':auto.precio,
-                'Imagen':imagen_base64
+                'Imagen':auto.imagen
             }
             autos_data.append(auto_data)
         return jsonify(autos_data)
@@ -180,7 +179,6 @@ def garaje_usuario(id_usuario):
         garaje_data=[]
         for auto_info in garaje:
             auto = db.session.get(Auto, auto_info.auto_id)
-            imagen_base64 = base64.b64encode(auto.imagen).decode('utf-8') 
             auto_data={
                 'Id':auto.id ,
                 'Marca':auto.marca,
@@ -188,7 +186,7 @@ def garaje_usuario(id_usuario):
                 'Modelo':auto.modelo,
                 'Año': auto.año,
                 'Precio':auto.precio,
-                'Imagen':imagen_base64,
+                'Imagen':auto.imagen,
                 'En_venta':auto_info.auto_en_venta,
                 'Id_garaje':auto_info.id,
                 'Precio_venta':auto_info.precio_de_venta
@@ -282,6 +280,8 @@ def terminar_dia(id_usuario,dia):
     try:
         usuario = db.session.get(Usuario,id_usuario)
         usuario.dia = int(dia) + 1
+        tienda = db.session.get(Tienda,usuario.tienda_id)
+        tienda.giros += 3
         db.session.commit() 
         
         return jsonify({'success':True,'message':'Dia actualizado con exito'})
@@ -289,14 +289,9 @@ def terminar_dia(id_usuario,dia):
         print(error)
         db.session.rollback()
         return jsonify({'success':False,'message':'El dia no se pudo actualizar'}),500
-    
+
 if __name__ == '__main__':
     db.init_app(app)
     with app.app_context():
         db.create_all()
-        # with open('toyota-corolla.jpg', 'rb') as f:
-        #     imagen_data = f.read()
-        # nuevo_auto = Auto(marca='Toyota', modelo='Corolla',nivel=2, año=2022, precio=20000, imagen=imagen_data)
-        # db.session.add(nuevo_auto)
-        # db.session.commit()
     app.run()

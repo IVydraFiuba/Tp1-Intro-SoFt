@@ -77,7 +77,7 @@ function iniciar_dia(){
             .then(cargar_tienda)
             .catch((error) => console.log("ERROR", error))
     }
-    let intervalo = setInterval(actualizar_hora,1000)
+    let intervalo = setInterval(actualizar_hora,20000)
 }
 function cargar_tienda(lista_autos){
     const contenedor_tienda = document.getElementById("contenedor_tienda")
@@ -87,17 +87,17 @@ function cargar_tienda(lista_autos){
         contenedor_tienda.innerHTML += `
         <div class="col">
             <div class="card h-100">
-                <img src="data:image/jpeg;base64,${lista_autos[index].Imagen}" class="card-img-top">
+                <img src="${autos_tienda[index].Imagen}" class="card-img-top">
                 <div class="card-body">
-                    <h5 class="card-title">${lista_autos[index].Marca} ${lista_autos[index].Modelo}</h5>
+                    <h5 class="card-title">${autos_tienda[index].Marca} ${autos_tienda[index].Modelo}</h5>
                     <p class="card-text">Datos del auto...
                     ...
                     ...
                     </p>
                 </div>
                 <div class="card-footer">
-                    <small class="text-body-secondary">${lista_autos[index].Precio}$</small>
-                    <button id="boton_${index}" onclick="comprar_auto(${lista_autos[index].Id},${id},${index})" type="button" class="btn btn-success" >Comprar</button>
+                    <small class="text-body-secondary">${autos_tienda[index].Precio}$</small>
+                    <button id="boton_${index}" onclick="comprar_auto(${autos_tienda[index].Id},${id},${index})" type="button" class="btn btn-success" >Comprar</button>
                 </div>
             </div>
         </div>
@@ -249,7 +249,7 @@ function iniciar_data_table(){
                 console.log(`ventana_modal_ofertas_${contenido[index].Id_garaje}`)
                 tabla.innerHTML+=`
                     <tr>
-                        <td><img src="data:image/jpeg;base64,${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>  
+                        <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>  
                         <td>${contenido[index].Marca}</td>
                         <td>${contenido[index].Modelo}</td>
                         <td>${contenido[index].Año}</td>
@@ -298,7 +298,7 @@ function iniciar_data_table(){
                                                         </thead>
                                                         <tbody>
                                                             <tr>
-                                                                <td><img src="data:image/jpeg;base64,${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>
+                                                                <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>
                                                                 <td>${contenido[index].Nivel}</td>
                                                                 <td>${contenido[index].Precio} $</td>
                                                                 <td>
@@ -522,9 +522,6 @@ function vender(id_garaje,precio){
             const contenedor_plata = document.getElementById("Plata_usuario")
             contenedor_plata.innerText = data.Plata
             plata_ganada += data.Ganancia
-            const myModalEl = document.getElementById(`ventana_modal_ofertas_${data.Id_garaje}`)
-            const modal = bootstrap.Modal.getInstance(myModalEl)
-            modal.hide()
             sacar_auto_a_la_venta(data.Id_garaje)
             iniciar_data_table()
         }else{

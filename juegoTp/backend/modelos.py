@@ -31,7 +31,7 @@ class Auto(db.Model):
     modelo = db.Column(db.String(255), nullable=False)
     año = db.Column(db.Integer, nullable=False)
     precio = db.Column(db.Integer, nullable=False )
-    imagen = db.Column(db.LargeBinary, nullable=False)
+    imagen = db.Column(db.String(255), nullable=False)
 
 
 #sirve para que pueda importar usando el * enves de poner todos los nombres
