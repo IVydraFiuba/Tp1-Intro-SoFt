@@ -10,6 +10,7 @@ var Autos_a_la_venta = []
 let hora_actual
 let plata_ganada = 0
 let plata_gastada = 0
+let nombre_usuario
 
 fetch("http://localhost:5000/usuarios/"+id)
             .then((respuesta) => respuesta.json())
@@ -22,7 +23,7 @@ fetch("http://localhost:5000/usuarios/"+id)
                 giros = contenido.Tienda.Giros
                 dia = contenido.Dia
                 plata = contenido.Plata
-
+                nombre_usuario = contenido.Nombre
                 const contenedor_nombre = document.getElementById("Nombre_concesionaria")
                 contenedor_nombre.innerText = contenido.Nombre_concesionaria
                 const contenedor_plata = document.getElementById("Plata_usuario")
@@ -280,7 +281,7 @@ function iniciar_data_table(){
                         </td>                         
                         <td>
                             <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                <button hidden onclick="sacar_de_venta(${contenido[index].Id_garaje})" id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger">Sacar de la venta</button>
+                                <button hidden onclick="sacar_de_venta(${contenido[index].Id_garaje})" id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger btn-lg">Sacar de la venta</button>
                                 <button id="boton_vender_${contenido[index].Id_garaje}"  type="button" class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_vender_${contenido[index].Id_garaje}">Poner en venta</button>
                                 <div class="modal fade" id="ventana_modal_vender_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
                                     <div class="modal-dialog modal-dialog-centered modal-xl">
@@ -407,7 +408,8 @@ function agregar_auto_a_la_venta(id_garaje,precio,precio_de_venta){
     let auto_para_vender = {
         Id_garaje: id_garaje,
         Precio: precio,
-        Precio_de_venta: precio_de_venta
+        Precio_de_venta: precio_de_venta,
+        Ofertado: false
     }
     Autos_a_la_venta.push(auto_para_vender)
 }
@@ -424,42 +426,34 @@ function revisar_autos_a_la_venta(){
         const id_garaje = Autos_a_la_venta[index].Id_garaje
         const precio_mercado = Autos_a_la_venta[index].Precio
         const precio_venta = Autos_a_la_venta[index].Precio_de_venta
+        var ofertado = Autos_a_la_venta[index].Ofertado
         const id_random = Math.random()
-        // Esta logica no tiene en cuenta si el jugador logra pasar los 20 dia,la uso por un tema de simplicidad en el trabajo practico
-        let margen_de_compra_inicial = 0.30
-        let margen_de_compra_diario = margen_de_compra_inicial - (dia * 0.01)
-        let porcentaje_de_compra = precio_mercado * margen_de_compra_diario
-
-        let cota_superior = precio_mercado + porcentaje_de_compra
-
-        let precio
-        let mensaje
-        if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
-            [precio,mensaje] = decidir_precio(precio_mercado,precio_venta,precio)
-            agregar_oferta(id_garaje,id_random,mensaje,precio)
-        }else if(precio_mercado > precio_venta){
-            precio = precio_venta
-            mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
-            agregar_oferta(id_garaje,id_random,mensaje,precio)
-        }else{
-            console.log("Esta demasiado caro")
+        if (!ofertado){
+            // Esta logica no tiene en cuenta si el jugador logra pasar los 20 dia,la uso por un tema de simplicidad en el trabajo practico
+            let margen_de_compra_inicial = 0.30
+            let margen_de_compra_diario = margen_de_compra_inicial - (dia * 0.01)
+            let porcentaje_de_compra = precio_mercado * margen_de_compra_diario
+    
+            let cota_superior = precio_mercado + porcentaje_de_compra
+    
+            let precio
+            let mensaje
+            if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
+                [precio,mensaje] = decidir_precio(precio_mercado,precio_venta,precio)
+                Autos_a_la_venta[index].Ofertado = true
+                agregar_oferta(id_garaje,id_random,mensaje,precio,precio_mercado)
+            }else if(precio_mercado > precio_venta){
+                precio = precio_venta
+                mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
+                Autos_a_la_venta[index].Ofertado = true
+                agregar_oferta(id_garaje,id_random,mensaje,precio,precio_mercado)
+            }else{
+                console.log("Esta demasiado caro")
+            }
         }
     }
-    function decidir_precio(precio_mercado,precio_de_venta,precio,mensaje){
-        let probabilidad_de_aceptar = 0.5 - (dia * 0.01)
-        const numero_random = Math.random() //entre el 0 - 1
-        if (numero_random < probabilidad_de_aceptar) {
-            precio = precio_de_venta
-            mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
-        }else{
-            precio_de_venta = 
-            precio = (precio_de_venta - (precio_de_venta - precio_mercado) * numero_random)
-            mensaje = `Te puedo ofrecer ${Math.round(precio / 100)*100} $ por el auto` 
-        }
-        return [Math.round(precio / 100)*100,mensaje]
-    }
 
-    function agregar_oferta(id_garaje,id_random,mensaje,precio){
+    function agregar_oferta(id_garaje,id_random,mensaje,precio,precio_mercado){
         let hora
         if(hora_actual > 12){
             hora =`${hora_actual - 12}:00 PM`
@@ -467,8 +461,8 @@ function revisar_autos_a_la_venta(){
             hora =`${hora_actual}:00 AM`
         }
         let contenedor_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
-        contenedor_ofertas.innerHTML +=`
-        <div class="card-body" data-mdb-perfect-scrollbar-init style="position: relative; height: 400px">
+        contenedor_ofertas.innerHTML =`
+        <div class="card-body" data-mdb-perfect-scrollbar-init style="position: relative; height: 400px id="contenedor_ofertas_${id_garaje}"">
             <div class="d-flex justify-content-between">
                 <p class="small mb-1">Timona Siera</p>
                 <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
@@ -477,35 +471,95 @@ function revisar_autos_a_la_venta(){
                 <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp"
                 alt="avatar 1" style="width: 90px; height: 100%;">
                 <div>
-                    <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" id="mensaje_oferta_${id_garaje}_${id_random}" ></p>
-                </div>
-            </div>
-            <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-                <div class="input-group mb-0">
-                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button" id="button-addon2" style="padding-top: .55rem;">No vender</button>
-                    <input type="number" class="form-control" placeholder="Type message"aria-label="Recipient's username" aria-describedby="button-addon2" />
-                    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" id="button-addon2" style="padding-top: .55rem;">Negociar</button>
-                    <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" id="button-addon2" style="padding-top: .55rem;">Vender</button>
+                    <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" >${mensaje}</p>
                 </div>
             </div>
         </div>
+        <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+            <div class="input-group mb-0">
+                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button"  style="padding-top: .55rem;">No vender</button>
+                <input type="number" class="form-control" id="precio_regate" placeholder="${precio}"/>
+                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" onclick="negociar(${id_garaje},${precio},${precio_mercado})">Negociar</button>
+                <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" style="padding-top: .55rem;">Vender</button>
+            </div>
+        </div>
         `
-        const mensaje_oferta = document.getElementById(`mensaje_oferta_${id_garaje}_${id_random}`)
-        mensaje_oferta.innerText=`${mensaje}`
-        
-        // <div class="d-flex justify-content-between">
-        //       <p class="small mb-1 text-muted">Dia 1 2:00 pm</p>
-        //       <p class="small mb-1">Johny Bullock</p>
-        //     </div>
-        // <div class="d-flex flex-row justify-content-end mb-4 pt-1">
-        //       <div>
-        //         <p class="small p-2 me-3 mb-3 text-white rounded-3 bg-warning">Thank you for your believe in
-        //           our
-        //           supports</p>
-        //       </div>
-        //       <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp"
-        //         alt="avatar 1" style="width: 45px; height: 100%;">
-        //     </div>
+    }
+}
+function decidir_precio(precio_mercado,precio_de_venta,precio,mensaje){
+    let probabilidad_de_aceptar = 0.5 - (dia * 0.01)
+    const numero_random = Math.random() //entre el 0 - 1
+    if (numero_random < probabilidad_de_aceptar) {
+        precio = precio_de_venta
+        mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
+    }else{
+        precio_de_venta = 
+        precio = (precio_de_venta - (precio_de_venta - precio_mercado) * numero_random)
+        mensaje = `Te puedo ofrecer ${Math.round(precio / 100)*100} $ por el auto` 
+    }
+    return [Math.round(precio / 100)*100,mensaje]
+}
+
+function negociar(id_garaje,precio_anterior,precio_mercado){
+    let precio_regate = document.getElementById("precio_regate").value
+    let hora
+        if(hora_actual > 12){
+            hora =`${hora_actual - 12}:00 PM`
+        }else{
+            hora =`${hora_actual}:00 AM`
+        }
+
+    const chat_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
+    chat_ofertas.innerHTML+=`
+        <div class="d-flex justify-content-between">
+            <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
+            <p class="small mb-1">${nombre_usuario}</p>
+        </div>
+        <div class="d-flex flex-row justify-content-end">
+            <div>
+                <p class="h3 p-2 me-3 mb-3 text-white rounded-3 bg-warning">Te lo puedo dejar por ${precio_regate} $</p>
+            </div>
+            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" style="width: 90px; height: 100%;">
+        </div>
+    `
+    let cota_superior = precio_anterior + (precio_mercado * (0.10 - (dia * 0.003)))
+    let mensaje
+    let precio
+    if (precio_mercado <= precio_regate && precio_regate <= cota_superior){
+        [precio,mensaje] = decidir_precio(precio_mercado,precio_regate,precio)
+        agregar_mensaje_regateo(mensaje,precio,precio_mercado)
+    }else if(precio_mercado > precio_regate){
+        precio = precio_regate
+        mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
+        agregar_mensaje_regateo(mensaje,precio,precio_mercado)
+    }else{
+        mensaje = "El auto no vale tanto,no me intentes estafar"
+        precio = 0
+        agregar_mensaje_regateo(mensaje,precio,precio_mercado)
+    }
+    function agregar_mensaje_regateo(mensaje,precio,precio_mercado){
+        let hora
+        if(hora_actual > 12){
+            hora =`${hora_actual - 12}:00 PM`
+        }else{
+            hora =`${hora_actual}:00 AM`
+        }
+        const chat_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
+        chat_ofertas.innerHTML+=`
+        <div class="d-flex justify-content-between">
+                    <p class="small mb-1">Timona Siera</p>
+                    <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
+                </div>
+                <div class="d-flex flex-row justify-content-start">
+                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp"
+                    alt="avatar 1" style="width: 90px; height: 100%;">
+                    <div>
+                        <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" >${mensaje}</p>
+                    </div>
+                </div>
+                <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+            </div>
+        `
     }
 }
 function vender(id_garaje,precio){
