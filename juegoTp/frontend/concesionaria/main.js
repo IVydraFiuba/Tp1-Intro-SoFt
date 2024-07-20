@@ -77,10 +77,14 @@ function iniciar_dia(){
             .then(cargar_tienda)
             .catch((error) => console.log("ERROR", error))
     }
-    let intervalo = setInterval(actualizar_hora,20000)
+    let intervalo = setInterval(actualizar_hora,5000)
 }
 function cargar_tienda(lista_autos){
     const contenedor_tienda = document.getElementById("contenedor_tienda")
+    if (nivel_tienda == 1){
+        const boton_mejorar_tienda = document.getElementById("boton_mejorar_tienda")
+        boton_mejorar_tienda.setAttribute("disabled","")
+    }
     let autos_tienda = mesclar_autos(lista_autos)
     contenedor_tienda.innerHTML = ""
     for (let index = 0; index < autos_tienda.length; index++) {
@@ -90,14 +94,10 @@ function cargar_tienda(lista_autos){
                 <img src="${autos_tienda[index].Imagen}" class="card-img-top">
                 <div class="card-body">
                     <h5 class="card-title">${autos_tienda[index].Marca} ${autos_tienda[index].Modelo}</h5>
-                    <p class="card-text">Datos del auto...
-                    ...
-                    ...
-                    </p>
                 </div>
                 <div class="card-footer">
                     <small class="text-body-secondary">${autos_tienda[index].Precio}$</small>
-                    <button id="boton_${index}" onclick="comprar_auto(${autos_tienda[index].Id},${id},${index})" type="button" class="btn btn-success" >Comprar</button>
+                    <button id="boton_${index}" onclick="comprar_auto(${autos_tienda[index].Id},${autos_tienda[index].Precio},${index})" type="button" class="btn btn-success" >Comprar</button>
                 </div>
             </div>
         </div>
@@ -142,21 +142,24 @@ function girar_tienda(lista_autos){
     }
 }
 
-function comprar_auto(auto_id,id,indice_boton){
-    fetch("http://localhost:5000/garaje/"+id,{
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({id_auto: auto_id,indice_boton: indice_boton})
-        })
-    .then((respuesta) => respuesta.json())
-    .then(procesar_respuesta_comprar)
-    .catch((error) => console.log("ERROR", error))
+function comprar_auto(auto_id,precio,indice_boton){
+    if (precio <= plata){
+        fetch("http://localhost:5000/garaje/"+id,{
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({id_auto: auto_id,indice_boton: indice_boton})
+            })
+        .then((respuesta) => respuesta.json())
+        .then(procesar_respuesta_comprar)
+        .catch((error) => console.log("ERROR", error))
+    }else{
+        alert("No te alcanza la plata para comprarlo")
+    }
 }
 function procesar_respuesta_comprar(data) {
     if (data.success) {
-        alert("Comprado con exito")
         const boton_compra = document.getElementById(`boton_${data.indice_boton}`)
         boton_compra.setAttribute("disabled","")
         const contenedor_plata = document.getElementById("Plata_usuario")
@@ -191,6 +194,8 @@ function mejorar_tienda(){
                     precio_mejora.innerText = 40000
                     plata_gastada -= 15000
                 }else{
+                    const boton_mejorar_tienda = document.getElementById("boton_mejorar_tienda")
+                    boton_mejorar_tienda.setAttribute("disabled","")
                     precio_mejora.innerText = "MAX"
                     plata_gastada -= 40000
                 }
@@ -203,7 +208,7 @@ function mejorar_tienda(){
                 alert(data.message)
             }
         }
-        }else{
+    }else{
         alert("Nivel maximo alcanzado")
     }
 }
@@ -212,7 +217,7 @@ function mejorar_tienda(){
 let dataTableinicializada=false;
 let dataTable;
         const ConfigDataTable = {
-            columnDefs:[{orderable:false,targets: 5}],
+            columnDefs:[{orderable:false,targets: [0,2,6,7]}],
             lengthMenu:[5,10,20,40],
             pageLength: 5,
             destroy:true,
@@ -246,7 +251,6 @@ function iniciar_data_table(){
         function cargar_tabla(contenido) {
             const tabla = document.getElementById("tabla_autos");
             for (let index = 0; index < contenido.length; index++) {
-                console.log(`ventana_modal_ofertas_${contenido[index].Id_garaje}`)
                 tabla.innerHTML+=`
                     <tr>
                         <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>  
@@ -337,9 +341,9 @@ function poner_en_venta(event,id_garaje){
     const DataFormulario = new FormData(event.target)
     let precio_venta =(DataFormulario.get("precio_venta"))
 
-    const myModalEl = document.getElementById(`ventana_modal_vender_${id_garaje}`);
-    const modal = bootstrap.Modal.getInstance(myModalEl);
-    modal.hide();
+    const myModalEl = document.getElementById(`ventana_modal_vender_${id_garaje}`)
+    const modal = bootstrap.Modal.getInstance(myModalEl)
+    modal.hide()
 
     let body
     body = {
@@ -522,6 +526,10 @@ function vender(id_garaje,precio){
             const contenedor_plata = document.getElementById("Plata_usuario")
             contenedor_plata.innerText = data.Plata
             plata_ganada += data.Ganancia
+
+            const myModalEl = document.getElementById(`ventana_modal_ofertas_${data.Id_garaje}`)
+            const modal = bootstrap.Modal.getInstance(myModalEl)
+            modal.hide()
             sacar_auto_a_la_venta(data.Id_garaje)
             iniciar_data_table()
         }else{
