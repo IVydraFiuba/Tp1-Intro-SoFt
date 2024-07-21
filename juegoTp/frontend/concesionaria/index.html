@@ -10,7 +10,7 @@
 <body data-bs-theme="dark">
     <header>
     <nav class="navbar navbar-expand-lg bg-body-tertiary">
-        <div class="container-fluid">
+        <div class="container">
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
             </button>
@@ -23,7 +23,7 @@
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h2 class="modal-title">TIENDA</h2>
-                                        <button id="boton_mejorar_tienda"type="button" class="btn btn-outline-success btn-lg" onclick="mejorar_tienda()">Mejorar tienda <span id="precio_mejora"></span> $</button>
+                                        <button id="boton_mejorar_tienda"type="button" class="btn btn-outline-success btn-lg ms-4" onclick="mejorar_tienda()">Mejorar tienda <span id="precio_mejora"></span> $</button>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body">  
@@ -35,16 +35,18 @@
                         </div>
                     </li>
                     <li class="nav-item p-3 py-md-1">
-                        <a href="../" class="nav-link">SALIR</a>
+                        <button type="button" class="btn btn-outline-light btn-lg ms-4" onclick="salir()">SALIR</button>
                     </li>
                 </ul>
-            <h1 id="Nombre_concesionaria"></h1>
-            <div class="card" style="width: 18rem;">
+            <div>
+                <h1 id="Nombre_concesionaria"style="width: 500px;"></h1>
+            </div>
+            <div class="card" style="width: 230px;">
                 <div class="card-body">
                     <h5 class="card-title">Plata -- <span id="Plata_usuario"></span>$</h5>
                     <h5 class="card-title">Dia -- <span id="Dia_usuario"></span> </h5class>
                 </div>
-                <div class="card" style="width: 12rem;">
+                <div class="card" style="width: 230px;">
                     <div class="card-body">
                         <button type="button" class="btn btn-outline-success btn-lg"  id="boton_iniciar_dia"  onclick="iniciar_dia()">Iniciar dia</button>
                         <button id="boton_pasar_dia" hidden type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_pasar_dia">Pasar de dia</button>
@@ -66,7 +68,6 @@
                     </div>
                 </div>
             </div>
-        </div>
     </nav>
     </header>
     <main>

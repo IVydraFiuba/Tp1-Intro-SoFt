@@ -29,9 +29,12 @@ def data_usuarios():
                             }
             }
             usuarios_data.append(usuario_data)
-        return jsonify(usuarios_data)
-    except Exception:
-        print(Exception)
+        if (len(usuario_data) == 0):
+            return jsonify({'success':False,"mensaje":"No tenemos usuarios cargados"}),409
+        else:
+            return jsonify({'success':True,'usuarios':usuarios_data})
+    except Exception as error:
+        print(error)
         return jsonify({'success':False,"mensaje":"No tenemos usuarios cargados"}),409
 
 @app.route('/usuarios', methods=["POST"])

@@ -31,6 +31,9 @@ fetch("http://localhost:5000/usuarios/"+id)
                 const contenedor_dia = document.getElementById("Dia_usuario")
                 contenedor_dia.innerText = dia
             }
+function salir(){
+    window.location.href = `../`;
+}
 
 function iniciar_dia(){
     const boton_iniciar = document.getElementById("boton_iniciar_dia")
@@ -45,7 +48,6 @@ function iniciar_dia(){
         hora_actual+=1
         if (hora_actual == 20){
             clearInterval(intervalo)
-            console.log("Dia terminado.")
             contenedor_tiempo.setAttribute("hidden","")
             const boton_pasar = document.getElementById("boton_pasar_dia")
             boton_pasar.removeAttribute("hidden")
@@ -78,7 +80,7 @@ function iniciar_dia(){
             .then(cargar_tienda)
             .catch((error) => console.log("ERROR", error))
     }
-    let intervalo = setInterval(actualizar_hora,5000)
+    let intervalo = setInterval(actualizar_hora,10000)
 }
 function cargar_tienda(lista_autos){
     const contenedor_tienda = document.getElementById("contenedor_tienda")
@@ -94,7 +96,7 @@ function cargar_tienda(lista_autos){
             <div class="card h-100">
                 <img src="${autos_tienda[index].Imagen}" class="card-img-top">
                 <div class="card-body">
-                    <h5 class="card-title">${autos_tienda[index].Marca} ${autos_tienda[index].Modelo}</h5>
+                    <h5 class="card-title ">${autos_tienda[index].Marca} ${autos_tienda[index].Modelo}</h5>
                 </div>
                 <div class="card-footer">
                     <small class="text-body-secondary">${autos_tienda[index].Precio}$</small>
@@ -103,7 +105,14 @@ function cargar_tienda(lista_autos){
             </div>
         </div>
                 `}
-    contenedor_tienda.innerHTML += `<button onclick='girar_tienda(${JSON.stringify(lista_autos)}, ${giros})' type="button" class="btn btn-success">Giro</button>`
+    contenedor_tienda.innerHTML +=`
+    <button onclick='girar_tienda(${JSON.stringify(lista_autos)}, ${giros})' type="button" class="btn btn-outline-primary position-relative" style="margin-left: 380px">Giro
+    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+    ${giros}
+    <span class="visually-hidden"></span>
+    </span>
+    </button>
+    `
 }
 function mesclar_autos(lista_autos){
     const autos_tienda = []
@@ -166,7 +175,9 @@ function procesar_respuesta_comprar(data) {
         const contenedor_plata = document.getElementById("Plata_usuario")
         contenedor_plata.innerText = data.Plata
         plata_gastada -= data.Precio
+        plata -= data.Precio
         iniciar_data_table()
+        cargar_pasar_dia()
         } 
     else {
         alert("Error al realizar la compra ")
@@ -175,18 +186,28 @@ function procesar_respuesta_comprar(data) {
 
 function mejorar_tienda(){
     if (!(nivel_tienda == 1)){
-        nivel_tienda -= 1
-        let body
-        body = {Nivel_actualizado: nivel_tienda}
-        fetch("http://localhost:5000/tienda_nivel/"+id_tienda,{
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(body)})
-        .then((respuesta) => respuesta.json())
-        .then(procesar_respuesta_nivel)
-        .catch((error) => console.log("ERROR", error))
+        let costo 
+        if (nivel_tienda == 3){
+            costo = 15000
+        }else{
+            costo = 40000
+        }
+        if (costo <= plata){
+            nivel_tienda -= 1
+            let body
+            body = {Nivel_actualizado: nivel_tienda}
+            fetch("http://localhost:5000/tienda_nivel/"+id_tienda,{
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(body)})
+            .then((respuesta) => respuesta.json())
+            .then(procesar_respuesta_nivel)
+            .catch((error) => console.log("ERROR", error))
+        }else{
+            alert("No te alcanza la plata para mejorar la tienda")
+        }
         
         function procesar_respuesta_nivel(data){
             if (data.success) {
@@ -194,12 +215,15 @@ function mejorar_tienda(){
                 if(nivel_tienda == 2){
                     precio_mejora.innerText = 40000
                     plata_gastada -= 15000
+                    plata -= 15000
                 }else{
                     const boton_mejorar_tienda = document.getElementById("boton_mejorar_tienda")
                     boton_mejorar_tienda.setAttribute("disabled","")
                     precio_mejora.innerText = "MAX"
                     plata_gastada -= 40000
+                    plata -= 40000
                 }
+                cargar_pasar_dia()
                 fetch("http://localhost:5000/autos/"+nivel_tienda)
                     .then((respuesta) => respuesta.json())
                     .then(cargar_tienda)
@@ -249,94 +273,92 @@ function iniciar_data_table(){
         .then(cargar_tabla)
         .catch((error) => console.log("ERROR", error))
         };
-        function cargar_tabla(contenido) {
-            const tabla = document.getElementById("tabla_autos");
-            for (let index = 0; index < contenido.length; index++) {
-                tabla.innerHTML+=`
-                    <tr>
-                        <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>  
-                        <td>${contenido[index].Marca}</td>
-                        <td>${contenido[index].Modelo}</td>
-                        <td>${contenido[index].Año}</td>
-                        <td>${contenido[index].Nivel}</td>
-                        <td>${contenido[index].Precio} $</td>
-                        <td>
-                            <button id="boton_ofertas_${contenido[index].Id_garaje}" disabled type="button" class="btn btn-outline-primary position-relative btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_ofertas_${contenido[index].Id_garaje}">
-                                Ofertas<span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">0<span class="visually-hidden">unread messages</span></span>
-                            </button>
-                            <div class="modal fade" id="ventana_modal_ofertas_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
-                                <div class="modal-dialog modal-dialog-centered modal-lg">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h2 class="modal-title">Chat de regateo</h2>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">  
-                                            <div id="contenedor_ofertas_${contenido[index].Id_garaje}">
-                                            </div>
+function cargar_tabla(contenido) {
+    const tabla = document.getElementById("tabla_autos");
+    for (let index = 0; index < contenido.length; index++) {
+        tabla.innerHTML+=`
+            <tr id="fila_${contenido[index].Id_garaje}">
+                <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>  
+                <td>${contenido[index].Marca}</td>
+                <td>${contenido[index].Modelo}</td>
+                <td>${contenido[index].Año}</td>
+                <td>${contenido[index].Nivel}</td>
+                <td>${contenido[index].Precio} $</td>
+                <td>
+                    <button id="boton_ofertas_${contenido[index].Id_garaje}" disabled type="button" class="btn btn-outline-primary position-relative btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_ofertas_${contenido[index].Id_garaje}">Ofertas
+                        <span id="notificacion_${contenido[index].Id_garaje}" class="position-absolute top-0 start-100 translate-middle p-2 bg-danger border border-light rounded-circle" hidden></span>
+                    </button>
+                    <div class="modal fade" id="ventana_modal_ofertas_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
+                        <div class="modal-dialog modal-dialog-centered modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h2 class="modal-title">Chat de regateo</h2>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">  
+                                    <div id="contenedor_ofertas_${contenido[index].Id_garaje}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </td>                         
+                <td>
+                    <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                        <button hidden onclick="sacar_de_venta(${contenido[index].Id_garaje})" id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger btn-lg">Sacar de la venta</button>
+                        <button id="boton_vender_${contenido[index].Id_garaje}"  type="button" class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_vender_${contenido[index].Id_garaje}">Poner en venta</button>
+                        <div class="modal fade" id="ventana_modal_vender_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered modal-xl">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h2 class="modal-title">Elije el precio de venta...</h2>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">  
+                                        <div class="row row-cols-md-3 g-4">
+                                            <table class="table table-striped">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Imagen</th>
+                                                        <th>Nivel</th>
+                                                        <th>Precio de compra</th>
+                                                        <th>Precio de venta</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr>
+                                                        <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>
+                                                        <td>${contenido[index].Nivel}</td>
+                                                        <td>${contenido[index].Precio} $</td>
+                                                        <td>
+                                                            <form onsubmit="poner_en_venta(event,${contenido[index].Id_garaje})">
+                                                                <input type="text" class="form-control" name="precio_venta" placeholder="${contenido[index].Precio } $" required>
+                                                                <button type="submit" class="btn btn-success mt-4">Presentar oferta</button>
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </td>                         
-                        <td>
-                            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                                <button hidden onclick="sacar_de_venta(${contenido[index].Id_garaje})" id="boton_sacar_venta_${contenido[index].Id_garaje}" type="button" class="btn btn-outline-danger btn-lg">Sacar de la venta</button>
-                                <button id="boton_vender_${contenido[index].Id_garaje}"  type="button" class="btn btn-outline-success btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_vender_${contenido[index].Id_garaje}">Poner en venta</button>
-                                <div class="modal fade" id="ventana_modal_vender_${contenido[index].Id_garaje}" tabindex="-1" data-bs-backdrop="static">
-                                    <div class="modal-dialog modal-dialog-centered modal-xl">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h2 class="modal-title">Elije el precio de venta...</h2>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                            </div>
-                                            <div class="modal-body">  
-                                                <div class="row row-cols-md-3 g-4">
-                                                    <table class="table table-striped">
-                                                        <thead>
-                                                            <tr>
-                                                                <th>Imagen</th>
-                                                                <th>Nivel</th>
-                                                                <th>Precio de compra</th>
-                                                                <th>Precio de venta</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            <tr>
-                                                                <td><img src="${contenido[index].Imagen}" class="card-img-top" style="width:300px;height:auto;"></td>
-                                                                <td>${contenido[index].Nivel}</td>
-                                                                <td>${contenido[index].Precio} $</td>
-                                                                <td>
-                                                                    <form onsubmit="poner_en_venta(event,${contenido[index].Id_garaje})">
-                                                                        <input type="text" class="form-control" name="precio_venta" placeholder="${contenido[index].Precio } $" required>
-                                                                        <button type="submit" class="btn btn-success">Presentar oferta</button>
-                                                                    </form>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </td>
-                    </tr>
-                    `
-                if (contenido[index].En_venta){
-                    agregar_auto_a_la_venta(contenido[index].Id_garaje,contenido[index].Precio,contenido[index].Precio_venta)
-                    const boton_oferta = document.getElementById(`boton_ofertas_${contenido[index].Id_garaje}`)
-                    boton_oferta.removeAttribute("disabled")
-                    const boton_venta = document.getElementById(`boton_vender_${contenido[index].Id_garaje}`)
-                    boton_venta.setAttribute("hidden","")
-                    const boton_sacar_venta = document.getElementById(`boton_sacar_venta_${contenido[index].Id_garaje}`)
-                    boton_sacar_venta.removeAttribute("hidden")
-                }
-            }
-            dataTable=$("#datatable_garaje").DataTable(ConfigDataTable);
-            dataTableinicializada = true;
+                        </div>
+                    </div>
+                </td>
+            </tr>
+            `
+        if (contenido[index].En_venta){
+            agregar_auto_a_la_venta(contenido[index].Id_garaje,contenido[index].Precio,contenido[index].Precio_venta)
+            const boton_venta = document.getElementById(`boton_vender_${contenido[index].Id_garaje}`)
+            boton_venta.setAttribute("hidden","")
+            const boton_sacar_venta = document.getElementById(`boton_sacar_venta_${contenido[index].Id_garaje}`)
+            boton_sacar_venta.removeAttribute("hidden")
         }
+    }
+    dataTable=$("#datatable_garaje").DataTable(ConfigDataTable);
+    dataTableinicializada = true;
+}
 function poner_en_venta(event,id_garaje){
     event.preventDefault()
     const DataFormulario = new FormData(event.target)
@@ -364,8 +386,6 @@ function poner_en_venta(event,id_garaje){
 function procesar_respuesta_poner_en_venta(data) {
     if (data.success) {
         agregar_auto_a_la_venta(data.Id_garaje,data.Precio,data.Precio_de_venta)
-        const boton_oferta = document.getElementById(`boton_ofertas_${data.Id_garaje}`)
-        boton_oferta.removeAttribute("disabled")
         const boton_venta = document.getElementById(`boton_vender_${data.Id_garaje}`)
         boton_venta.setAttribute("hidden","")
         const boton_sacar_venta = document.getElementById(`boton_sacar_venta_${data.Id_garaje}`)
@@ -398,6 +418,9 @@ function sacar_de_venta(id_garaje){
             boton_sacar_venta.setAttribute("hidden","")
             const boton_venta = document.getElementById(`boton_vender_${data.Id_garaje}`)
             boton_venta.removeAttribute("hidden")
+            const notificacion = document.getElementById(`notificacion_${data.Id_garaje}`)
+            notificacion.setAttribute("hidden","")
+
         } 
         else {
             alert(data.message)
@@ -423,11 +446,10 @@ function sacar_auto_a_la_venta(id_garaje){
 }
 function revisar_autos_a_la_venta(){
     for (let index = 0; index < Autos_a_la_venta.length; index++) {
+        var ofertado = Autos_a_la_venta[index].Ofertado
         const id_garaje = Autos_a_la_venta[index].Id_garaje
         const precio_mercado = Autos_a_la_venta[index].Precio
         const precio_venta = Autos_a_la_venta[index].Precio_de_venta
-        var ofertado = Autos_a_la_venta[index].Ofertado
-        const id_random = Math.random()
         if (!ofertado){
             // Esta logica no tiene en cuenta si el jugador logra pasar los 20 dia,la uso por un tema de simplicidad en el trabajo practico
             let margen_de_compra_inicial = 0.30
@@ -438,52 +460,26 @@ function revisar_autos_a_la_venta(){
     
             let precio
             let mensaje
+            const boton_oferta = document.getElementById(`boton_ofertas_${id_garaje}`)
+            const notificacion = document.getElementById(`notificacion_${id_garaje}`);
+
             if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
+                boton_oferta.removeAttribute("disabled")
+                if (notificacion) {notificacion.removeAttribute("hidden")}                
                 [precio,mensaje] = decidir_precio(precio_mercado,precio_venta,precio)
                 Autos_a_la_venta[index].Ofertado = true
-                agregar_oferta(id_garaje,id_random,mensaje,precio,precio_mercado)
+                agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
             }else if(precio_mercado > precio_venta){
+                boton_oferta.removeAttribute("disabled")
+                if (notificacion) {notificacion.removeAttribute("hidden")}                
                 precio = precio_venta
                 mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
                 Autos_a_la_venta[index].Ofertado = true
-                agregar_oferta(id_garaje,id_random,mensaje,precio,precio_mercado)
+                agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
             }else{
                 console.log("Esta demasiado caro")
             }
         }
-    }
-
-    function agregar_oferta(id_garaje,id_random,mensaje,precio,precio_mercado){
-        let hora
-        if(hora_actual > 12){
-            hora =`${hora_actual - 12}:00 PM`
-        }else{
-            hora =`${hora_actual}:00 AM`
-        }
-        let contenedor_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
-        contenedor_ofertas.innerHTML =`
-        <div class="card-body" data-mdb-perfect-scrollbar-init style="position: relative; height: 400px id="contenedor_ofertas_${id_garaje}"">
-            <div class="d-flex justify-content-between">
-                <p class="small mb-1">Timona Siera</p>
-                <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
-            </div>
-            <div class="d-flex flex-row justify-content-start">
-                <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp"
-                alt="avatar 1" style="width: 90px; height: 100%;">
-                <div>
-                    <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" >${mensaje}</p>
-                </div>
-            </div>
-        </div>
-        <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-            <div class="input-group mb-0">
-                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button"  style="padding-top: .55rem;">No vender</button>
-                <input type="number" class="form-control" id="precio_regate" placeholder="${precio}"/>
-                <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" onclick="negociar(${id_garaje},${precio},${precio_mercado})">Negociar</button>
-                <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" style="padding-top: .55rem;">Vender</button>
-            </div>
-        </div>
-        `
     }
 }
 function decidir_precio(precio_mercado,precio_de_venta,precio,mensaje){
@@ -499,7 +495,40 @@ function decidir_precio(precio_mercado,precio_de_venta,precio,mensaje){
     }
     return [Math.round(precio / 100)*100,mensaje]
 }
-
+function agregar_oferta(id_garaje,mensaje,precio,precio_mercado){
+let hora
+if(hora_actual > 12){
+    hora =`${hora_actual - 12}:00 PM`
+}else{
+    hora =`${hora_actual}:00 AM`
+}
+let contenedor_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
+contenedor_ofertas.innerHTML =`
+<div class="card-body data-mdb-perfect-scrollbar-init" style="position: relative; height: 400px overflow-y: auto">
+<div id="contenedor_mensajes_ofertas_${id_garaje}">
+    <div class="d-flex justify-content-between">
+        <p class="small mb-1">Timona Siera</p>
+        <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
+    </div>
+    <div class="d-flex flex-row justify-content-start">
+        <img src="imagenes/avatar_1.webp"
+        alt="avatar 1" style="width: 90px; height: 100%;">
+        <div>
+            <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" >${mensaje}</p>
+        </div>
+    </div>
+</div>
+</div>
+<div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+    <div class="input-group mb-0" id="contenedor_mensajes_botones_${id_garaje}">
+        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button"  style="padding-top: .55rem;">No vender</button>
+        <input type="number" class="form-control" id="precio_regate" value="${precio}"/>
+        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" onclick="negociar(${id_garaje},${precio},${precio_mercado})">Negociar</button>
+        <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" style="padding-top: .55rem;">Vender</button>
+    </div>
+</div>
+`
+}
 function negociar(id_garaje,precio_anterior,precio_mercado){
     let precio_regate = document.getElementById("precio_regate").value
     let hora
@@ -508,8 +537,7 @@ function negociar(id_garaje,precio_anterior,precio_mercado){
         }else{
             hora =`${hora_actual}:00 AM`
         }
-
-    const chat_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
+    const chat_ofertas = document.getElementById(`contenedor_mensajes_ofertas_${id_garaje}`)
     chat_ofertas.innerHTML+=`
         <div class="d-flex justify-content-between">
             <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
@@ -519,7 +547,7 @@ function negociar(id_garaje,precio_anterior,precio_mercado){
             <div>
                 <p class="h3 p-2 me-3 mb-3 text-white rounded-3 bg-warning">Te lo puedo dejar por ${precio_regate} $</p>
             </div>
-            <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava6-bg.webp" style="width: 90px; height: 100%;">
+            <img src="imagenes/avatar_2.webp" style="width: 90px; height: 100%;">
         </div>
     `
     let cota_superior = precio_anterior + (precio_mercado * (0.10 - (dia * 0.003)))
@@ -527,42 +555,48 @@ function negociar(id_garaje,precio_anterior,precio_mercado){
     let precio
     if (precio_mercado <= precio_regate && precio_regate <= cota_superior){
         [precio,mensaje] = decidir_precio(precio_mercado,precio_regate,precio)
-        agregar_mensaje_regateo(mensaje,precio,precio_mercado)
+        agregar_mensaje_regateo(mensaje,id_garaje,precio,precio_mercado)
     }else if(precio_mercado > precio_regate){
         precio = precio_regate
         mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
-        agregar_mensaje_regateo(mensaje,precio,precio_mercado)
+        agregar_mensaje_regateo(mensaje,id_garaje,precio,precio_mercado)
     }else{
         mensaje = "El auto no vale tanto,no me intentes estafar"
-        precio = 0
-        agregar_mensaje_regateo(mensaje,precio,precio_mercado)
-    }
-    function agregar_mensaje_regateo(mensaje,precio,precio_mercado){
-        let hora
-        if(hora_actual > 12){
-            hora =`${hora_actual - 12}:00 PM`
-        }else{
-            hora =`${hora_actual}:00 AM`
-        }
-        const chat_ofertas = document.getElementById(`contenedor_ofertas_${id_garaje}`)
-        chat_ofertas.innerHTML+=`
-        <div class="d-flex justify-content-between">
-                    <p class="small mb-1">Timona Siera</p>
-                    <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
-                </div>
-                <div class="d-flex flex-row justify-content-start">
-                    <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava5-bg.webp"
-                    alt="avatar 1" style="width: 90px; height: 100%;">
-                    <div>
-                        <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" >${mensaje}</p>
-                    </div>
-                </div>
-                <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
-            </div>
-        `
+        precio = precio_mercado
+        agregar_mensaje_regateo(mensaje,id_garaje,precio,precio_mercado)
     }
 }
-function vender(id_garaje,precio){
+function agregar_mensaje_regateo(mensaje,id_garaje,precio,precio_mercado){
+    let hora
+    if(hora_actual > 12){
+        hora =`${hora_actual - 12}:00 PM`
+    }else{
+        hora =`${hora_actual}:00 AM`
+    }
+    const chat_ofertas = document.getElementById(`contenedor_mensajes_ofertas_${id_garaje}`)
+    chat_ofertas.innerHTML+=`
+            <div class="d-flex justify-content-between">
+                <p class="small mb-1">Timona Siera</p>
+                <p class="small mb-1 text-muted">Dia ${dia} ${hora} </p>
+            </div>
+            <div class="d-flex flex-row justify-content-start">
+                <img src="imagenes/avatar_1.webp"style="width: 90px; height: 100%;">
+                <div>
+                    <p class=" h3 p-2 ms-3 mb-3 rounded-3 bg-body-tertiary" >${mensaje}</p>
+                </div>
+            </div>
+            <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
+        </div>
+    `
+    const contenedor_mensajes_botones = document.getElementById(`contenedor_mensajes_botones_${id_garaje}`)
+    contenedor_mensajes_botones.innerHTML=`
+    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button"  style="padding-top: .55rem;">No vender</button>
+    <input type="number" class="form-control" id="precio_regate" value="${precio}"/>
+    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" onclick="negociar(${id_garaje},${precio},${precio_mercado})">Negociar</button>
+    <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" style="padding-top: .55rem;">Vender</button>
+    `
+}
+    function vender(id_garaje,precio){
     let body
     body = {Ganancia: precio}
     fetch("http://localhost:5000/garaje_vender/"+id_garaje,{
@@ -580,12 +614,19 @@ function vender(id_garaje,precio){
             const contenedor_plata = document.getElementById("Plata_usuario")
             contenedor_plata.innerText = data.Plata
             plata_ganada += data.Ganancia
+            plata += data.Ganancia
 
-            const myModalEl = document.getElementById(`ventana_modal_ofertas_${data.Id_garaje}`)
-            const modal = bootstrap.Modal.getInstance(myModalEl)
-            modal.hide()
+            const modal = document.getElementById(`ventana_modal_ofertas_${data.Id_garaje}`)
+            const modal_instancia = bootstrap.Modal.getInstance(modal)
+            if (modal && modal.classList.contains('show')) {
+                modal_instancia.hide()}
+            const notificacion = document.getElementById(`notificacion_${data.Id_garaje}`)
+            notificacion.setAttribute("hidden","")
             sacar_auto_a_la_venta(data.Id_garaje)
-            iniciar_data_table()
+
+            const fila_id = `#fila_${data.Id_garaje}`
+            dataTable.row(fila_id).remove().draw(false)
+            cargar_pasar_dia()
         }else{
             alert("No se pudo vender")
         }

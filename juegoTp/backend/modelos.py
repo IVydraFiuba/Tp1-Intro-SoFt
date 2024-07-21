@@ -8,7 +8,7 @@ class Usuario(db.Model):
     nom_usuario = db.Column(db.String(255), nullable=False)
     nom_concesionaria = db.Column(db.String(255), nullable=False)
     tienda_id = db.Column(db.Integer, db.ForeignKey('tiendas.id'), nullable=False)
-    plata = db.Column(db.Integer, nullable=False , default=5000)
+    plata = db.Column(db.Integer, nullable=False , default=10000)
     dia = db.Column(db.Integer, nullable=False , default=1)
 class Tienda(db.Model):
     __tablename__ = 'tiendas'
@@ -33,6 +33,4 @@ class Auto(db.Model):
     precio = db.Column(db.Integer, nullable=False )
     imagen = db.Column(db.String(255), nullable=False)
 
-
-#sirve para que pueda importar usando el * enves de poner todos los nombres
 __all__ = ['db','Usuario','Tienda','Garaje','Auto']

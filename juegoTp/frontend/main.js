@@ -2,39 +2,47 @@ fetch("http://localhost:5000/usuarios")
             .then((respuesta) => respuesta.json())
             .then(cargar_datos)
             .catch((error) => console.log("ERROR", error))
+
 function cargar_datos(contenido){
-    if (!(contenido[0].success)){
-        const boton_jugar = document.getElementById("boton_jugar")
+    const boton_jugar = document.getElementById("boton_jugar")
+    const modal = document.getElementById("ventana_modal_jugar")
+    const modal_instancia = bootstrap.Modal.getInstance(modal)
+    if (!(contenido.success)){
+        if (modal.classList.contains('show')) {
+            modal_instancia.hide()}
         boton_jugar.setAttribute("disabled","")
     }
     else{
+        boton_jugar.removeAttribute("disabled")
         const tabla_usuarios = document.getElementById("elegir_usuarios")
-        for (let index = 0; index < contenido.length; index++) {
+        tabla_usuarios.innerHTML = ``
+        let usuarios = contenido.usuarios
+        for (let index = 0; index < usuarios.length; index++) {
             const item = document.createElement("a");
             item.setAttribute("class", "list-group-item list-group-item-action");
-            item.setAttribute("href", `/concesionaria?id=${contenido[index].Id}`);
+            item.setAttribute("href", `/concesionaria?id=${usuarios[index].Id}`);
             item.setAttribute("aria-current", "true");
             item.innerHTML = `
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">${contenido[index].Nombre}</h5>
-                <p>"Dia - ${contenido[index].Dia}"</p>
+                <h5 class="mb-1">${usuarios[index].Nombre}</h5>
+                <p>"Dia - ${usuarios[index].Dia}"</p>
             </div>
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">${contenido[index].Nombre_concesionaria}</h5>
-                <p>"Plata - ${contenido[index].Plata} $"</p>
+                <h5 class="mb-1">${usuarios[index].Nombre_concesionaria}</h5>
+                <p>"Plata - ${usuarios[index].Plata} $"</p>
             </div>
             `
             tabla_usuarios.append(item)
             tabla_usuarios.innerHTML+=`
-            <div class="content">
-                <button type="button" class="btn btn-outline-danger" onclick="eliminar_usuario(${contenido[index].Id})">Eliminar</button>
-                <button class="btn btn-outline-light " data-bs-toggle="modal" data-bs-target="#ventana_modal_editar_${contenido[index].Id}">Editar</button>
+            <div class="d-flex flex-row justify-content-end">
+                <button type="button" class="btn btn-outline-danger me-3 mt-2 mb-2" onclick="eliminar_usuario(${usuarios[index].Id})">Eliminar</button>
+                <button class="btn btn-outline-light me-3 mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#ventana_modal_editar_${usuarios[index].Id}">Editar</button>
             </div>
             `
             const contenedor_padre = document.getElementById("contenedor_padre")
             const modal = document.createElement("div")
             modal.classList.add("modal", "fade")
-            modal.id = `ventana_modal_editar_${contenido[index].Id}`
+            modal.id = `ventana_modal_editar_${usuarios[index].Id}`
             modal.setAttribute("data-bs-backdrop", "static")
             modal.innerHTML = `
                 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -44,14 +52,14 @@ function cargar_datos(contenido){
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <div class="modal-body">
-                            <form onsubmit="editar_usuario(event,${contenido[index].Id})">
+                            <form onsubmit="editar_usuario(event,${usuarios[index].Id})">
                                 <div class="mb-3">
                                     <label for="nom_nuevo" class="form-label">Nombre del personaje</label>
-                                    <input placeholder="${contenido[index].Nombre}" type="text" class="form-control" name="nom_nuevo" required>
+                                    <input placeholder="${usuarios[index].Nombre}" type="text" class="form-control" name="nom_nuevo" required>
                                 </div>
                                 <div class="mb-3">
                                     <label for="nom_nuevo_concesionaria" class="form-label">Nombre de la concesionaria</label>
-                                    <input placeholder="${contenido[index].Nombre_concesionaria}" type="text" class="form-control" name="nom_nuevo_concesionaria"  required>
+                                    <input placeholder="${usuarios[index].Nombre_concesionaria}" type="text" class="form-control" name="nom_nuevo_concesionaria"  required>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
@@ -122,10 +130,16 @@ function procesar_respuesta_crear(data) {
     if (data.success) {
         let respuesta = confirm("Quires empezar la partida con el?")
         if (respuesta) {
-            window.location.href = `/concesionaria?id=${data.Id_usuario}`;
+            window.location.href = `/concesionaria?id=${data.Id_usuario}`
         }
         else {
-            location.reload()
+            fetch("http://localhost:5000/usuarios")
+            .then((respuesta) => respuesta.json())
+            .then(cargar_datos)
+            .catch((error) => console.log("ERROR", error))
+            const modal = document.getElementById("ventana_modal_crear")
+            const modal_instancia = bootstrap.Modal.getInstance(modal)
+            modal_instancia.hide()
         }
     } 
     else {
@@ -143,8 +157,10 @@ function eliminar_usuario(id_usuario){
 }
 function procesar_respuesta_eliminar(data) {
     if (data.success) {
-        alert(data.message)
-        location.reload();
+        fetch("http://localhost:5000/usuarios")
+            .then((respuesta) => respuesta.json())
+            .then(cargar_datos)
+            .catch((error) => console.log("ERROR", error))
     } 
     else {
         alert(data.message)
@@ -174,8 +190,10 @@ function editar_usuario(event,id_usuario){
         }
     function procesar_respuesta_editar(data) {
         if (data.success) {
-            alert(data.message)
-            location.reload();
+            fetch("http://localhost:5000/usuarios")
+            .then((respuesta) => respuesta.json())
+            .then(cargar_datos)
+            .catch((error) => console.log("ERROR", error))
         } 
         else {
             alert(data.message)

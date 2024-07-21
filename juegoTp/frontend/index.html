@@ -11,10 +11,12 @@
         <div class="row">
             <div class="col-12 col-md-10 col-lg-6 mx-auto">
                 <div class="card">
-                    <div class="card-body">
-                            <h1 class="card-title display-3 text-primary font-weight-bold">Fast and rich</h1>
+                    <div class="card-body" >
+                        <div class="d-flex flex-column align-items-center justify-content-center" style="height: 100%;">
+                            <h1 class="card-title display-3 text-primary font-weight-bold" >Fast and rich</h1>
                             <p class="lead text-muted">¡Compra y vende coches para construir tu imperio automotriz!</p>
-                        <div class="d-grid gap-2" id="contenedor_padre"> 
+                        </div>
+                            <div class="d-grid gap-2" id="contenedor_padre"> 
                             <button id="boton_jugar" type="button" class="btn btn-outline-primary btn-lg" data-bs-toggle="modal" data-bs-target="#ventana_modal_jugar">JUGAR</button>
                             <div class="modal fade" id="ventana_modal_jugar" tabindex="-1" data-bs-backdrop="static">
                                 <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -55,7 +57,7 @@
                                                 <div id="campos_extra" style="display: none;">
                                                     <div class="mb-3">
                                                         <label for="plata" class="form-label">Plata</label>
-                                                        <input type="number" class="form-control" name="plata" min="0" value="5000" required>
+                                                        <input type="number" class="form-control" name="plata" min="0" value="10000" required>
                                                     </div>
                                                     <div class="mb-3">
                                                         <label for="dia" class="form-label">Dia</label>
@@ -75,8 +77,8 @@
                                                     </div>
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                                                    <button type="submit" class="btn btn-success">Cargar</button>
+                                                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+                                                    <button type="submit" class="btn btn-outline-success">Cargar</button>
                                                 </div>
                                             </form>
                                         </div>
