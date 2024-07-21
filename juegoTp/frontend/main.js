@@ -190,6 +190,10 @@ function editar_usuario(event,id_usuario){
         }
     function procesar_respuesta_editar(data) {
         if (data.success) {
+            const modal = document.getElementById(`ventana_modal_editar_${data.Id_usuario}`)
+            const modal_instancia = bootstrap.Modal.getInstance(modal)
+            if (modal.classList.contains('show')) {
+                modal_instancia.hide()}
             fetch("http://localhost:5000/usuarios")
             .then((respuesta) => respuesta.json())
             .then(cargar_datos)
