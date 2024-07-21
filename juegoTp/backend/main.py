@@ -111,7 +111,7 @@ def editar_usuario(id_usuario):
         usuario.nom_concesionaria = Nom_nuevo_concesionaria
         db.session.commit() 
         
-        return jsonify({'success':True,'message':'Usuario editado con exito'})
+        return jsonify({'success':True,'message':'Usuario editado con exito','Id_usuario':id_usuario})
     except Exception as error:
         print(error)
         db.session.rollback()
