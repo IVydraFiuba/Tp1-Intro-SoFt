@@ -54,11 +54,7 @@ function iniciar_dia(){
             boton_tienda.setAttribute("disabled","")
             cargar_pasar_dia()
         }else{
-            let probabilidad_de_oferta = 0.5 - (dia * 0.001)
-            const numero_random = Math.random() //entre el 0 - 1
-            if (numero_random < probabilidad_de_oferta) {
-                revisar_autos_a_la_venta()
-            }
+            revisar_autos_a_la_venta()
             if(hora_actual > 12){
                 contenedor_tiempo.textContent =`${hora_actual - 12}:00 PM`
             }else{
@@ -80,7 +76,7 @@ function iniciar_dia(){
             .then(cargar_tienda)
             .catch((error) => console.log("ERROR", error))
     }
-    let intervalo = setInterval(actualizar_hora,10000)
+    let intervalo = setInterval(actualizar_hora,8000)
 }
 function cargar_tienda(lista_autos){
     const contenedor_tienda = document.getElementById("contenedor_tienda")
@@ -94,9 +90,9 @@ function cargar_tienda(lista_autos){
         contenedor_tienda.innerHTML += `
         <div class="col">
             <div class="card h-100">
-                <img src="${autos_tienda[index].Imagen}" class="card-img-top">
-                <div class="card-body">
-                    <h5 class="card-title ">${autos_tienda[index].Marca} ${autos_tienda[index].Modelo}</h5>
+                <img src="${autos_tienda[index].Imagen}" class="card-img-top" width="300" height="225">
+                <div class="card-body align-text-bottom">
+                    <h5 class="card-title">${autos_tienda[index].Marca} ${autos_tienda[index].Modelo}</h5>
                 </div>
                 <div class="card-footer">
                     <small class="text-body-secondary">${autos_tienda[index].Precio}$</small>
@@ -129,7 +125,7 @@ function girar_tienda(lista_autos){
         giros -= 1
         let body
         body = {Giros_actualizados: giros}
-        fetch("http://localhost:5000/tienda_giros/"+id_tienda,{
+        fetch(`http://localhost:5000/tienda/${id_tienda}/giros`,{
             method: "PUT",
             headers: {
                 "Content-Type": "application/json"
@@ -173,9 +169,9 @@ function procesar_respuesta_comprar(data) {
         const boton_compra = document.getElementById(`boton_${data.indice_boton}`)
         boton_compra.setAttribute("disabled","")
         const contenedor_plata = document.getElementById("Plata_usuario")
-        contenedor_plata.innerText = data.Plata
         plata_gastada -= data.Precio
         plata -= data.Precio
+        contenedor_plata.innerText = data.Plata
         iniciar_data_table()
         cargar_pasar_dia()
         } 
@@ -196,7 +192,7 @@ function mejorar_tienda(){
             nivel_tienda -= 1
             let body
             body = {Nivel_actualizado: nivel_tienda}
-            fetch("http://localhost:5000/tienda_nivel/"+id_tienda,{
+            fetch(`http://localhost:5000/tienda/${id_tienda}/nivel`,{
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
@@ -212,16 +208,19 @@ function mejorar_tienda(){
         function procesar_respuesta_nivel(data){
             if (data.success) {
                 const precio_mejora= document.getElementById("precio_mejora")
+                const contenedor_plata = document.getElementById("Plata_usuario")
                 if(nivel_tienda == 2){
                     precio_mejora.innerText = 40000
                     plata_gastada -= 15000
                     plata -= 15000
+                    contenedor_plata.innerText = plata
                 }else{
+                    precio_mejora.innerText = "MAX"
                     const boton_mejorar_tienda = document.getElementById("boton_mejorar_tienda")
                     boton_mejorar_tienda.setAttribute("disabled","")
-                    precio_mejora.innerText = "MAX"
                     plata_gastada -= 40000
                     plata -= 40000
+                    contenedor_plata.innerText = plata
                 }
                 cargar_pasar_dia()
                 fetch("http://localhost:5000/autos/"+nivel_tienda)
@@ -399,7 +398,7 @@ function procesar_respuesta_poner_en_venta(data) {
 function sacar_de_venta(id_garaje){
     let body
     body = {Id_garaje: id_garaje}
-    fetch("http://localhost:5000/garaje_sacar_venta/"+id,{
+    fetch(`http://localhost:5000/garaje/${id}/sacar_venta`,{
         method: "PUT",
         headers: {
             "Content-Type": "application/json"
@@ -447,37 +446,41 @@ function sacar_auto_a_la_venta(id_garaje){
 function revisar_autos_a_la_venta(){
     for (let index = 0; index < Autos_a_la_venta.length; index++) {
         var ofertado = Autos_a_la_venta[index].Ofertado
-        const id_garaje = Autos_a_la_venta[index].Id_garaje
-        const precio_mercado = Autos_a_la_venta[index].Precio
-        const precio_venta = Autos_a_la_venta[index].Precio_de_venta
         if (!ofertado){
-            // Esta logica no tiene en cuenta si el jugador logra pasar los 20 dia,la uso por un tema de simplicidad en el trabajo practico
-            let margen_de_compra_inicial = 0.30
-            let margen_de_compra_diario = margen_de_compra_inicial - (dia * 0.01)
-            let porcentaje_de_compra = precio_mercado * margen_de_compra_diario
-    
-            let cota_superior = precio_mercado + porcentaje_de_compra
-    
-            let precio
-            let mensaje
-            const boton_oferta = document.getElementById(`boton_ofertas_${id_garaje}`)
-            const notificacion = document.getElementById(`notificacion_${id_garaje}`);
+            let probabilidad_de_oferta = 0.5 - (dia * 0.001)
+            const numero_random = Math.random() //entre el 0 - 1
+            if (numero_random < probabilidad_de_oferta) {
+                const id_garaje = Autos_a_la_venta[index].Id_garaje
+                const precio_mercado = Autos_a_la_venta[index].Precio
+                const precio_venta = Autos_a_la_venta[index].Precio_de_venta
+                // Esta logica no tiene en cuenta si el jugador logra pasar los 20 dia,la uso por un tema de simplicidad en el trabajo practico
+                let margen_de_compra_inicial = 0.30
+                let margen_de_compra_diario = margen_de_compra_inicial - (dia * 0.01)
+                let porcentaje_de_compra = precio_mercado * margen_de_compra_diario
+                
+                let cota_superior = precio_mercado + porcentaje_de_compra
+                
+                let precio
+                let mensaje
+                const boton_oferta = document.getElementById(`boton_ofertas_${id_garaje}`)
+                const notificacion = document.getElementById(`notificacion_${id_garaje}`)
 
-            if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
-                boton_oferta.removeAttribute("disabled")
-                if (notificacion) {notificacion.removeAttribute("hidden")}                
-                [precio,mensaje] = decidir_precio(precio_mercado,precio_venta,precio)
-                Autos_a_la_venta[index].Ofertado = true
-                agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
-            }else if(precio_mercado > precio_venta){
-                boton_oferta.removeAttribute("disabled")
-                if (notificacion) {notificacion.removeAttribute("hidden")}                
-                precio = precio_venta
-                mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
-                Autos_a_la_venta[index].Ofertado = true
-                agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
-            }else{
-                console.log("Esta demasiado caro")
+                if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
+                    boton_oferta.removeAttribute("disabled")
+                    if (notificacion) {notificacion.removeAttribute("hidden")}                
+                    [precio,mensaje] = decidir_precio(precio_mercado,precio_venta,precio)
+                    Autos_a_la_venta[index].Ofertado = true
+                    agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
+                }else if(precio_mercado > precio_venta){
+                    boton_oferta.removeAttribute("disabled")
+                    if (notificacion) {notificacion.removeAttribute("hidden")}                
+                    precio = precio_venta
+                    mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
+                    Autos_a_la_venta[index].Ofertado = true
+                    agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
+                }else{
+                    console.log("Esta demasiado caro")
+                }
             }
         }
     }
@@ -521,16 +524,28 @@ contenedor_ofertas.innerHTML =`
 </div>
 <div class="card-footer text-muted d-flex justify-content-start align-items-center p-3">
     <div class="input-group mb-0" id="contenedor_mensajes_botones_${id_garaje}">
-        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button"  style="padding-top: .55rem;">No vender</button>
-        <input type="number" class="form-control" id="precio_regate" value="${precio}"/>
+        <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button" onclick="no_vender(${id_garaje})"  style="padding-top: .55rem;">No vender</button>
+        <input type="number" class="form-control" id="precio_regate_${id_garaje}" value="${precio}"/>
         <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" onclick="negociar(${id_garaje},${precio},${precio_mercado})">Negociar</button>
         <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" style="padding-top: .55rem;">Vender</button>
     </div>
-</div>
-`
+</div>`
+}
+function no_vender(id_garaje){
+    const modal = document.getElementById(`ventana_modal_ofertas_${id_garaje}`)
+    const modal_instancia = bootstrap.Modal.getInstance(modal)
+    if (modal && modal.classList.contains('show')) {modal_instancia.hide()}
+    for (let index = 0; index < Autos_a_la_venta.length; index++) {
+        if (Autos_a_la_venta[index].Id_garaje == id_garaje)
+            Autos_a_la_venta[index].Ofertado = false
+    }
+    const notificacion = document.getElementById(`notificacion_${id_garaje}`)
+    if (notificacion) {notificacion.setAttribute("hidden","")}
+    const boton_oferta = document.getElementById(`boton_ofertas_${id_garaje}`)
+    boton_oferta.setAttribute("disabled","")
 }
 function negociar(id_garaje,precio_anterior,precio_mercado){
-    let precio_regate = document.getElementById("precio_regate").value
+    let precio_regate = document.getElementById(`precio_regate_${id_garaje}`).value
     let hora
         if(hora_actual > 12){
             hora =`${hora_actual - 12}:00 PM`
@@ -590,8 +605,7 @@ function agregar_mensaje_regateo(mensaje,id_garaje,precio,precio_mercado){
     `
     const contenedor_mensajes_botones = document.getElementById(`contenedor_mensajes_botones_${id_garaje}`)
     contenedor_mensajes_botones.innerHTML=`
-    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button"  style="padding-top: .55rem;">No vender</button>
-    <input type="number" class="form-control" id="precio_regate" value="${precio}"/>
+    <button data-mdb-button-init data-mdb-ripple-init class="btn btn-danger" type="button" onclick="no_vender(${id_garaje})"  style="padding-top: .55rem;">No vender</button>    <input type="number" class="form-control" id="precio_regate_${id_garaje}" value="${precio}"/>
     <button data-mdb-button-init data-mdb-ripple-init class="btn btn-warning" type="button" onclick="negociar(${id_garaje},${precio},${precio_mercado})">Negociar</button>
     <button onclick="vender(${id_garaje},${precio})" data-mdb-button-init data-mdb-ripple-init class="btn btn-success" type="button" style="padding-top: .55rem;">Vender</button>
     `
@@ -599,7 +613,7 @@ function agregar_mensaje_regateo(mensaje,id_garaje,precio,precio_mercado){
     function vender(id_garaje,precio){
     let body
     body = {Ganancia: precio}
-    fetch("http://localhost:5000/garaje_vender/"+id_garaje,{
+    fetch(`http://localhost:5000/garaje/${id_garaje}/vender`,{
         method: "POST",
         headers: {
             "Content-Type": "application/json"
@@ -636,22 +650,29 @@ function cargar_pasar_dia(){
     const contenedor_pasar_dia = document.getElementById("contenedor_pasar_dia")
     contenedor_pasar_dia.innerHTML=`
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">Dinero generado:</h5>
-                <p>${plata_ganada}$</p>
+                <h5 class="mb-1 text-success">Dinero generado:</h5>
+                <p class="text-success">${plata_ganada}$</p>
             </div>
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1">Dinero gastado:</h5>
-                <p>${plata_gastada}$</p>
+                <h5 class="mb-1 text-danger">Dinero gastado:</h5>
+                <p class="text-danger">${plata_gastada}$</p>
             </div>
             <div class="d-flex w-100 justify-content-between">
                 <h5 class="mb-1">Resumen:</h5>
-                <p>${plata_gastada + plata_ganada}$</p>
+                <p id="resumen">${plata_gastada + plata_ganada}$</p>
             </div>
-            <div class="content">
-                <button type="button" class="btn btn-outline-danger" onclick="terminar_dia()">Terminar dia</button>
+            <div class="d-flex flex-row-reverse">
+                <button type="button" class="btn btn-outline-primary" onclick="terminar_dia()">Terminar dia</button>
             </div>
     `
+    const texto_resumen = document.getElementById("resumen")
+    if (plata_ganada > (plata_gastada * -1)){
+        texto_resumen.setAttribute("class","text-success")
+    }else if(plata_ganada < (plata_gastada * -1)){
+        texto_resumen.setAttribute("class","text-danger")
+    }
 }
+
 function terminar_dia(){
     fetch(`http://localhost:5000/usuarios/${id}/terminar_dia/${dia}`,{method: "PUT"})
             .then((respuesta) => respuesta.json())

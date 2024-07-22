@@ -128,7 +128,7 @@ function crear_usuario(event){
 
 function procesar_respuesta_crear(data) {
     if (data.success) {
-        let respuesta = confirm("Quires empezar la partida con el?")
+        let respuesta = confirm("Queres empezar la partida con el?")
         if (respuesta) {
             window.location.href = `/concesionaria?id=${data.Id_usuario}`
         }

@@ -88,10 +88,15 @@ def data_usuario(id_usuario):
 def eliminar_usuario(id_usuario):
     try:
         usuario = db.session.get(Usuario,id_usuario)
-        Garaje.query.filter_by(usuario_id=id_usuario).delete()
+        garajes = Garaje.query.filter_by(usuario_id=id_usuario)
         tienda = db.session.get(Tienda,usuario.tienda_id)
-        Usuario.query.filter_by(tienda_id=tienda.id).delete()
-        db.session.delete(usuario)  
+
+        for garaje in garajes:
+            db.session.delete(garaje)
+        db.session.commit()  
+        db.session.delete(usuario)
+        db.session.commit()  
+        db.session.delete(tienda)
         db.session.commit() 
 
         return jsonify({'success':True,"message":"Usuario eliminado con exito"})
@@ -120,25 +125,33 @@ def editar_usuario(id_usuario):
 @app.route('/autos/<nivel_tienda>',methods=["GET"]) 
 def data_autos(nivel_tienda):
     try:
-        autos = Auto.query.filter_by(nivel=nivel_tienda).all()
+        nivel_tienda = int(nivel_tienda)
         autos_data=[]
-        for auto in autos: 
-            auto_data={
-                'Id':auto.id ,
-                'Nivel':auto.nivel,
-                'Marca':auto.marca,
-                'Modelo':auto.modelo,
-                'Año': auto.año,
-                'Precio':auto.precio,
-                'Imagen':auto.imagen
-            }
-            autos_data.append(auto_data)
+        if (nivel_tienda == 1):
+            niveles = [1,2,3]
+        elif(nivel_tienda == 2):
+            niveles = [2,3]
+        else:
+            niveles=[3]
+        for nivel in niveles:
+            autos = Auto.query.filter_by(nivel=nivel).all()
+            for auto in autos: 
+                auto_data={
+                    'Id':auto.id ,
+                    'Nivel':auto.nivel,
+                    'Marca':auto.marca,
+                    'Modelo':auto.modelo,
+                    'Año': auto.año,
+                    'Precio':auto.precio,
+                    'Imagen':auto.imagen
+                }
+                autos_data.append(auto_data)
         return jsonify(autos_data)
     except Exception as error:
         print(error)
-        return jsonify({'success':False,"mensaje":"No tenemos autos cargados"}),409
+        return jsonify({'success':False,"mensaje":"No tenemos autos cargados de ese nivel"}),409
 
-@app.route('/tienda_giros/<id_tienda>', methods=["PUT"])
+@app.route('/tienda/<id_tienda>/giros', methods=["PUT"])
 def editar_giros(id_tienda):
     try:
         formulario_data =request.json
@@ -154,7 +167,7 @@ def editar_giros(id_tienda):
         db.session.rollback()
         return jsonify({'success':False,'message':'No se pudo actualizar los giros'}),500
 
-@app.route('/tienda_nivel/<id_tienda>', methods=["PUT"])
+@app.route('/tienda/<id_tienda>/nivel', methods=["PUT"])
 def editar_nivel(id_tienda):
     try:
         formulario_data =request.json
@@ -162,10 +175,10 @@ def editar_nivel(id_tienda):
         usuario = Usuario.query.filter_by(tienda_id=id_tienda).first()
         tienda = db.session.get(Tienda,id_tienda)
         if (nivel_actualizado == 2):
-            usuario.plata -= 15000
+            precio = 15000
         else:
-            usuario.plata -= 40000
-            
+            precio = 40000
+        usuario.plata -= precio
         tienda.nivel = nivel_actualizado
         db.session.commit() 
         
@@ -203,7 +216,6 @@ def garaje_usuario(id_usuario):
 
 @app.route('/garaje/<id_usuario>', methods=["POST"])
 def comprar_auto(id_usuario):
-    #FALTAN VALIDACIONES
     try:
         data_request =request.json
         id_auto = data_request.get("id_auto")
@@ -243,7 +255,7 @@ def poner_en_venta(id_usuario):
         db.session.rollback()
         return jsonify({'success':False,'message':'El auto no se pudo poner en venta'}),500
 
-@app.route('/garaje_vender/<id_garaje>',methods=["POST"])
+@app.route('/garaje/<id_garaje>/vender',methods=["POST"])
 def vender_auto(id_garaje):
     try:
         data =request.json
@@ -261,7 +273,7 @@ def vender_auto(id_garaje):
         print(error)
         return jsonify({'success':False,"message":"No se pudo realizar la venta"}),409
 
-@app.route('/garaje_sacar_venta/<id_usuario>', methods=["PUT"])
+@app.route('/garaje/<id_usuario>/sacar_venta', methods=["PUT"])
 def sacar_en_venta(id_usuario):
     try:
         cambios_data =request.json
