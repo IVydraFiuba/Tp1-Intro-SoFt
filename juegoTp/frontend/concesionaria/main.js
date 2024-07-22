@@ -112,13 +112,15 @@ function cargar_tienda(lista_autos){
 }
 function mesclar_autos(lista_autos){
     const autos_tienda = []
+    //Copio la lista de autos para no modificarla al eliminar los autos que ya se agregaron a autos_tienda
     const copia_lista_autos = lista_autos.slice()
     for (let i = 0; i < 3; i++) {
+        //math.floor redondea el numero hacia abajo NO hacia arriba
         const index_aleatorio = Math.floor(Math.random() * copia_lista_autos.length)
-        autos_tienda.push(copia_lista_autos[index_aleatorio]);
-        copia_lista_autos.splice(index_aleatorio, 1);
+        autos_tienda.push(copia_lista_autos[index_aleatorio])
+        copia_lista_autos.splice(index_aleatorio, 1)
         }
-    return autos_tienda;}
+    return autos_tienda}
 
 function girar_tienda(lista_autos){
     if (giros > 0){
@@ -447,47 +449,53 @@ function revisar_autos_a_la_venta(){
     for (let index = 0; index < Autos_a_la_venta.length; index++) {
         var ofertado = Autos_a_la_venta[index].Ofertado
         if (!ofertado){
-            let probabilidad_de_oferta = 0.5 - (dia * 0.001)
-            const numero_random = Math.random() //entre el 0 - 1
-            if (numero_random < probabilidad_de_oferta) {
-                const id_garaje = Autos_a_la_venta[index].Id_garaje
-                const precio_mercado = Autos_a_la_venta[index].Precio
-                const precio_venta = Autos_a_la_venta[index].Precio_de_venta
-                // Esta logica no tiene en cuenta si el jugador logra pasar los 20 dia,la uso por un tema de simplicidad en el trabajo practico
-                let margen_de_compra_inicial = 0.30
-                let margen_de_compra_diario = margen_de_compra_inicial - (dia * 0.01)
-                let porcentaje_de_compra = precio_mercado * margen_de_compra_diario
-                
-                let cota_superior = precio_mercado + porcentaje_de_compra
-                
-                let precio
-                let mensaje
-                const boton_oferta = document.getElementById(`boton_ofertas_${id_garaje}`)
-                const notificacion = document.getElementById(`notificacion_${id_garaje}`)
-
-                if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
+            const id_garaje = Autos_a_la_venta[index].Id_garaje
+            const precio_mercado = Autos_a_la_venta[index].Precio
+            const precio_venta = Autos_a_la_venta[index].Precio_de_venta
+            // Esta logica no tiene en cuenta si el jugador logra pasar los 40 dia,la uso por un tema de simplicidad en el trabajo practico
+            let margen_de_compra_diario = 0.30 - (dia * 0.01)
+            let porcentaje_de_compra = precio_mercado * margen_de_compra_diario
+            let cota_superior = precio_mercado + porcentaje_de_compra
+            
+            let precio
+            let mensaje
+            const boton_oferta = document.getElementById(`boton_ofertas_${id_garaje}`)
+            const notificacion = document.getElementById(`notificacion_${id_garaje}`)
+            if (precio_mercado <= precio_venta && precio_venta <= cota_superior){
+                let probabilidad_de_oferta = 0.5 - (dia * 0.001)
+                const numero_random = Math.random() 
+                if (numero_random < probabilidad_de_oferta) {
                     boton_oferta.removeAttribute("disabled")
                     if (notificacion) {notificacion.removeAttribute("hidden")}                
                     [precio,mensaje] = decidir_precio(precio_mercado,precio_venta,precio)
                     Autos_a_la_venta[index].Ofertado = true
                     agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
-                }else if(precio_mercado > precio_venta){
+                }
+            }else if(precio_mercado > precio_venta){
+                boton_oferta.removeAttribute("disabled")
+                if (notificacion) {notificacion.removeAttribute("hidden")}                
+                precio = precio_venta
+                mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
+                Autos_a_la_venta[index].Ofertado = true
+                agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
+            }else{
+                let probabilidad_de_oferta = 0.1 
+                const numero_random = Math.random() 
+                if (numero_random < probabilidad_de_oferta) {
                     boton_oferta.removeAttribute("disabled")
                     if (notificacion) {notificacion.removeAttribute("hidden")}                
-                    precio = precio_venta
-                    mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
+                    precio = precio_mercado - (precio_mercado * 0.1)
+                    mensaje = `Ese precio es demasiado,te ofresco ${precio} por el`
                     Autos_a_la_venta[index].Ofertado = true
                     agregar_oferta(id_garaje,mensaje,precio,precio_mercado)
-                }else{
-                    console.log("Esta demasiado caro")
                 }
             }
         }
     }
 }
 function decidir_precio(precio_mercado,precio_de_venta,precio,mensaje){
-    let probabilidad_de_aceptar = 0.5 - (dia * 0.01)
-    const numero_random = Math.random() //entre el 0 - 1
+    let probabilidad_de_aceptar = 0.4 - (dia * 0.01)
+    const numero_random = Math.random() 
     if (numero_random < probabilidad_de_aceptar) {
         precio = precio_de_venta
         mensaje = `Me parece un buen trato me lo llevare por ${precio}$`
@@ -650,11 +658,11 @@ function cargar_pasar_dia(){
     const contenedor_pasar_dia = document.getElementById("contenedor_pasar_dia")
     contenedor_pasar_dia.innerHTML=`
             <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-success">Dinero generado:</h5>
+                <h5 class="mb-1 text-success">Plata generada:</h5>
                 <p class="text-success">${plata_ganada}$</p>
             </div>
-            <div class="d-flex w-100 justify-content-between">
-                <h5 class="mb-1 text-danger">Dinero gastado:</h5>
+            <div class="d-flex w-100 justify-content-between" id="plata_gastada">
+                <h5 class="mb-1 text-danger">Plata gastada:</h5>
                 <p class="text-danger">${plata_gastada}$</p>
             </div>
             <div class="d-flex w-100 justify-content-between">
